@@ -1,5 +1,7 @@
 "use strict";
 
+var fs = require('fs');
+var path = require('path');
 var should = require('should');
 var request = require('supertest');
 
@@ -719,4 +721,107 @@ describe('HttpDriver', function() {
                 done();
             });
     });
+
+    it('should route to a file in route 40 with file', function(done) {
+
+        request(app)
+            .get('/route-40/sample-jpg.jpg')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+
+                fs.readFile(path.join(__dirname,'/../','public','sample-jpg.jpg'), { encoding: 'utf8' }, function (err, data ) {
+
+                    new Buffer(res.body).toString().should.equal(data);
+                    done();
+                });
+            });
+    });
+
+    it('should route to a file in a subdirectory in route 40 with file', function(done) {
+
+        request(app)
+            .get('/route-40/public-2/sample-gif.gif')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+
+                fs.readFile(path.join(__dirname,'/../','public', 'public-2', 'sample-gif.gif'), { encoding: 'utf8' }, function (err, data ) {
+
+                    new Buffer(res.body).toString().should.equal(data);
+                    done();
+                });
+            });
+    });
+
+    it('should not route to the route-40 directory', function(done) {
+
+        request(app)
+            .get('/route-40')
+            .expect(301, done);
+    });
+
+    it('should route to a file in route 41 with file', function(done) {
+
+        request(app)
+            .get('/route-41/sample-bmp.bmp')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+
+                fs.readFile(path.join(__dirname,'/../','public', 'public-2', 'sample-bmp.bmp'), { encoding: 'utf8' }, function (err, data ) {
+
+                    new Buffer(res.body).toString().should.equal(data);
+                    done();
+                });
+            });
+    });
+
+    it('should route to a file in route 42 with file', function(done) {
+
+        request(app)
+            .get('/route-42/sample-jpg.jpg')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+
+                fs.readFile(path.join(__dirname,'/../','public', 'public-3', 'sample-jpg.jpg'), { encoding: 'utf8' }, function (err, data ) {
+
+                    new Buffer(res.body).toString().should.equal(data);
+                    done();
+                });
+            });
+    });
+
+    it('should route to a file in route 43 with file', function(done) {
+
+        request(app)
+            .get('/route-43/sample-png.png')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+
+                fs.readFile(path.join(__dirname,'/../','public', 'public-2', 'public-4', 'sample-png.png'), { encoding: 'utf8' }, function (err, data ) {
+
+                    new Buffer(res.body).toString().should.equal(data);
+                    done();
+                });
+            });
+    });
+
 });

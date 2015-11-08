@@ -104,6 +104,8 @@ module.exports = function(config, controllerHandler) {
         /**
          * Route a uri to a public directory to serve its contents.
          *
+         * public_config has the same params as: https://github.com/pillarjs/send#options
+         *
          * @param uri
          * @param public_dir
          * @param public_config

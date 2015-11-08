@@ -1,4 +1,7 @@
 "use strict";
+var path = require('path');
+var public_dir = path.join(__dirname,'/../', 'public');
+
 
 function ok(req, res) {
 
@@ -326,6 +329,13 @@ module.exports = function(ScenicRoute) {
     route.delete('/route-37', ok);
     route.patch('/route-38', ok);
     route.options('/route-39', ok);
+
+    route.serve('/route-40', public_dir);
+    route.serve('/route-41', path.join(public_dir, 'public-2'));
+    route.serve('/route-42', path.join(public_dir, 'public-3'));
+    route.serve('/route-43', path.join(public_dir, 'public-2', 'public-4'));
+
+
 
     return route;
 };

@@ -15,7 +15,7 @@ module.exports = class HttpDriver {
 
         this.ScenicRoute = ScenicRoute;
         this._regexes = {};
-        this._to_serve = {};
+        this._to_serve = [];
     }
 
     /**
