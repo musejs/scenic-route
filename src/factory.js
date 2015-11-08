@@ -3,10 +3,13 @@ var _ = require('lodash');
 var path = require('path');
 var qs = require('qs');
 
+var variable_param_key = Symbol('variable_param');
+var variable_regex_param_key = Symbol('variable_regex_param');
+
 module.exports = function(config, controllerHandler) {
 
     var actionHandler = require('./actionHandler');
-    var middlewareHandler = require('./middlewareHander');
+    var middlewareHandler = require('./middlewareHandler');
     var notFoundHandler = require('./notFoundHandler');
     var Driver = require('./drivers/HttpDriver');
 
@@ -21,7 +24,7 @@ module.exports = function(config, controllerHandler) {
         actionHandler: actionHandler,
         middlewareHandler: middlewareHandler,
         notFoundHandler: notFoundHandler,
-        error_handlers: [],
+        error_middleware: [],
         Driver: Driver
     });
 
@@ -29,7 +32,7 @@ module.exports = function(config, controllerHandler) {
 
         constructor(options) {
 
-            this.options = this.constructor.normalizeOptions(options);
+            this._options = this.constructor.normalizeOptions(options);
         }
 
         /**
@@ -107,7 +110,7 @@ module.exports = function(config, controllerHandler) {
          */
         serve(uri, public_dir, public_config) {
 
-            var action = config.Driver.publicHandler(public_dir, public_config);
+            var action = config.Driver.publicHandler(public_dir, public_config, config.notFoundHandler);
 
             this.route('PUBLIC', uri, action);
         }
@@ -155,10 +158,10 @@ module.exports = function(config, controllerHandler) {
             group_options = this.constructor.normalizeOptions(group_options);
 
             var new_options = {
-                prefix: path.join(this.options.prefix, group_options.prefix),
-                middleware: this.options.middleware.concat(group_options.middleware),
-                namespace: path.join(this.options.namespace, group_options.namespace),
-                as: this.options.as + group_options.as
+                prefix: path.join(this._options.prefix, group_options.prefix),
+                middleware: this._options.middleware.concat(group_options.middleware),
+                namespace: path.join(this._options.namespace, group_options.namespace),
+                as: this._options.as + group_options.as
             };
 
             closure(this.constructor.make(new_options));
@@ -185,7 +188,7 @@ module.exports = function(config, controllerHandler) {
                 controller_options = {};
             }
 
-            var actions = controllerHandler(controller_name, this.options);
+            var actions = controllerHandler(controller_name, this._options);
 
             this.group({prefix: uri}, function(route) {
 
@@ -248,7 +251,7 @@ module.exports = function(config, controllerHandler) {
                 throw new Error('Optional param is not the suffix of the uri ' +uri);
             }
 
-            var pieces = this.constructor.normalizeUri(path.join(this.options.prefix, uri));
+            var pieces = this.constructor.parseUri(path.join(this._options.prefix, uri));
             var action_description = this.normalizeAction(action);
 
             this.createBranch(verb, pieces, action_description);
@@ -290,19 +293,32 @@ module.exports = function(config, controllerHandler) {
 
                     if (action_description.where[param_name]) {
 
-                        regex = action_description.where[param_name];
+                        regex = action_description.where[param_name].toString();
 
-                        piece = action_description.where[param_name].toString();
+                        piece = 'regex';
 
-                        if (!routes['??']) {
-                            routes['??'] = [];
+                        if (!routes[variable_regex_param_key]) {
+                            routes[variable_regex_param_key] = [];
                         }
-                        routes['??'].push({});
-                        routes = routes['??'][routes['??'].length - 1];
+                        routes[variable_regex_param_key].push({});
+                        routes = routes[variable_regex_param_key][routes[variable_regex_param_key].length - 1];
 
                     } else {
-                        piece = '?';
+                        piece = variable_param_key;
                     }
+                }
+
+                if (!routes[piece]) {
+
+                    routes[piece] = {};
+                }
+
+                if (regex) {
+                    routes[piece].pattern = regex;
+                }
+
+                if (param_name) {
+                    routes[piece].name = param_name;
                 }
 
                 if (!routes[piece]) {
@@ -327,9 +343,9 @@ module.exports = function(config, controllerHandler) {
                 }
             }
 
-            routes[piece].stack = this.options.middleware
+            routes[piece].stack = this._options.middleware
                 .concat(action_description.middleware)
-                .concat(action_description.action);
+                .concat(action_description.closure);
 
             if (action_description.name) {
                 this.constructor.names[action_description.name] = pieces.join('/').replace('/', '');
@@ -342,6 +358,8 @@ module.exports = function(config, controllerHandler) {
             if (l === last_piece.length - 2 && l !== -1) {
 
                 pieces.pop();
+
+                action_description.name = null;
 
                 this.createBranch(verb, pieces, action_description);
             }
@@ -368,8 +386,8 @@ module.exports = function(config, controllerHandler) {
 
                 if (action.as) {
                     name = action.as;
-                    if (this.options.as) {
-                        name = this.options.as + name;
+                    if (this._options.as) {
+                        name = this._options.as + name;
                     }
                 }
 
@@ -432,12 +450,10 @@ module.exports = function(config, controllerHandler) {
          */
         static startServer(port, callback) {
 
-            var driver = config.Driver.make(this.tree);
+            var driver = config.Driver.make(this);
 
             driver.parseRoutes();
-
-            driver.listen(port, config.error_handlers, callback);
-
+            driver.listen(port, callback);
         }
 
         /**
@@ -463,18 +479,21 @@ module.exports = function(config, controllerHandler) {
 
             _.forIn(params, function(value, param) {
 
-                if (uri.indexOf('{'+param+'}') !== -1) {
+                if (value !== undefined) {
 
-                    uri = uri.replace('{'+param+'}', value);
+                    if (uri.indexOf('{'+param+'}') !== -1) {
 
-                } else if (uri.indexOf('{'+param+'?}') !== -1) {
+                        uri = uri.replace('{'+param+'}', value);
 
-                    uri = uri.replace('{'+param+'?}', value);
+                    } else if (uri.indexOf('{'+param+'?}') !== -1) {
 
-                } else {
+                        uri = uri.replace('{'+param+'?}', value);
 
-                    has_query = true;
-                    query[param] = value;
+                    } else {
+
+                        has_query = true;
+                        query[param] = value;
+                    }
                 }
             });
 
@@ -497,7 +516,12 @@ module.exports = function(config, controllerHandler) {
          */
         static addErrorMiddleware(errorMiddleware) {
 
-            config.error_handlers.push(config.middlewareHandler(errorMiddleware));
+            config.error_middleware.push(config.middlewareHandler(errorMiddleware));
+        }
+
+        static get errorMiddleware() {
+
+            return config.error_middleware;
         }
 
         /**
@@ -540,6 +564,11 @@ module.exports = function(config, controllerHandler) {
             config.Driver = Driver;
         }
 
+        /**
+         * Get tree.
+         *
+         * @returns {{}|*}
+         */
         static get tree() {
 
             if (!this._tree) {
@@ -548,6 +577,11 @@ module.exports = function(config, controllerHandler) {
             return this._tree;
         }
 
+        /**
+         * Get names.
+         *
+         * @returns {{}|*}
+         */
         static get names() {
 
             if (!this._names) {
@@ -556,6 +590,11 @@ module.exports = function(config, controllerHandler) {
             return this._names;
         }
 
+        /**
+         * Get patterns.
+         *
+         * @returns {{}|*}
+         */
         static get patterns() {
 
             if (!this._patterns) {
@@ -564,11 +603,59 @@ module.exports = function(config, controllerHandler) {
             return this._patterns;
         }
 
+        /**
+         * Get supported verbs.
+         *
+         * @returns {string[]}
+         */
         static get verbs() {
 
             return ['get', 'post', 'put', 'delete', 'patch', 'options'];
         }
 
+        static variableParamKey() {
+
+            return variable_param_key;
+        }
+
+        static variableRegexParamKey() {
+
+            return variable_regex_param_key;
+        }
+
+        static factoryConfig() {
+
+            return config;
+        }
+
+        /**
+         * Helper to parse route uris.
+         *
+         * @param uri
+         * @returns {Array}
+         */
+        static parseUri(uri) {
+
+            uri = uri.replace('/', ''); // remove prefixed slashes
+            uri = uri.replace(/\/+$/, ''); // remove trailing slashes
+
+            uri = '/'+uri;
+            var pieces = uri.split('/');
+
+            pieces[0] = '/';
+
+            if (uri === '/') {
+                pieces = ['/'];
+            }
+            return pieces;
+        }
+
+        /**
+         * Helper to normalize route options.
+         *
+         * @param options
+         * @returns {*}
+         */
         static normalizeOptions(options) {
 
             if (!options) {
@@ -587,22 +674,12 @@ module.exports = function(config, controllerHandler) {
 
         }
 
-        static normalizeUri(uri) {
-
-            uri = uri.replace('/', ''); // remove prefixed slashes
-            uri = uri.replace(/\/+$/, ''); // remove trailing slashes
-
-            uri = '/'+uri;
-            var pieces = uri.split('/');
-
-            pieces[0] = '/';
-
-            if (uri === '/') {
-                pieces = ['/'];
-            }
-            return pieces;
-        }
-
+        /**
+         * Helper to normalize route middleware.
+         *
+         * @param options
+         * @returns {Array}
+         */
         static normalizeOptionsMiddleware(options) {
 
             var middleware = [];

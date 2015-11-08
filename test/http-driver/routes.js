@@ -1,0 +1,722 @@
+"use strict";
+
+var should = require('should');
+var request = require('supertest');
+
+var routes = require('../fixtures/routes');
+var app;
+
+describe('HttpDriver', function() {
+
+    var ScenicRoute = require('../../src/factory')();
+
+    before(function(done) {
+
+        var route = routes(ScenicRoute);
+
+        //console.log(JSON.stringify(ScenicRoute.tree));
+        ScenicRoute.startServer(1337, function(err, server) {
+
+            app = server;
+            done();
+        });
+    });
+
+    it('should route to the root with ok', function(done) {
+
+        request(app)
+            .get('/')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should not route to the root', function(done) {
+
+        request(app)
+            .post('/')
+            .expect(404, done);
+    });
+
+    it('should route to route 1 with ok', function(done) {
+
+        request(app)
+            .get('/route-1')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+
+    });
+
+    it('should route to route 2 with ok', function(done) {
+
+        request(app)
+            .get('/route-2')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+
+    });
+
+    it('should not route to route 3', function(done) {
+
+        request(app)
+            .get('/route 3')
+            .expect(404, done);
+
+    });
+
+    it('should route to route 4 and 5 with ok', function(done) {
+
+        request(app)
+            .get('/route-4/route-5')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+
+    });
+
+    it('should not route to route 5', function(done) {
+
+        request(app)
+            .post('/route-5')
+            .expect(404, done);
+    });
+
+    it('should route to route 6, 7, and 8 with ok', function(done) {
+
+        request(app)
+            .get('/route-6/route-7/route-8')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+
+    });
+
+    it('should not route to route 6 and 7', function(done) {
+
+        request(app)
+            .post('/route-6/route-7')
+            .expect(404, done);
+
+    });
+
+    it('should not route to route 7', function(done) {
+
+        request(app)
+            .post('/route-7')
+            .expect(404, done);
+
+    });
+
+    it('should not route to route 7 and 8', function(done) {
+
+        request(app)
+            .post('/route-7/route-8')
+            .expect(404, done);
+
+    });
+
+    it('should route to route dot with ok', function(done) {
+
+        request(app)
+            .get('/routedot.')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route dot 2 with ok', function(done) {
+
+        request(app)
+            .get('/routedot.2')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route slash with ok', function(done) {
+
+        request(app)
+            .get('/routeslash')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route slash 2 with ok', function(done) {
+
+        request(app)
+            .get('/routeslash2')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route 9 with ok', function(done) {
+
+        request(app)
+            .get('/route-9')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route 10 with ok', function(done) {
+
+        request(app)
+            .get('/route-10')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route 11 with middleware response', function(done) {
+
+        request(app)
+            .get('/route-11')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('middleware_1');
+                done();
+            });
+    });
+
+    it('should route to route 12 with middleware response', function(done) {
+
+        request(app)
+            .get('/route-12')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('middleware_1|middleware_2');
+                done();
+            });
+    });
+
+    it('should route to route 13 with thing', function(done) {
+
+        request(app)
+            .get('/route-13/hello')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('hello');
+                done();
+            });
+    });
+
+    it('should route to route 14 with thing', function(done) {
+
+        request(app)
+            .get('/route-14/hello')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-14/hello');
+                done();
+            });
+    });
+
+    it('should not route to route 15 with an alpha thing', function(done) {
+
+        request(app)
+            .get('/route-15/hello')
+            .expect(404, done);
+    });
+
+    it('should route to route 15 with a numeric thing', function(done) {
+
+        request(app)
+            .get('/route-15/15')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-15/15');
+                done();
+            });
+    });
+
+    it('should not route to route 16 with a numeric thing', function(done) {
+
+        request(app)
+            .get('/route-16/16')
+            .expect(404, done);
+    });
+
+    it('should route to route 16 with an alpha thing', function(done) {
+
+        request(app)
+            .get('/route-16/hello')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-16/hello');
+                done();
+            });
+    });
+
+    it('should route to route 17 with thing and another thing', function(done) {
+
+        request(app)
+            .get('/route-17/hello/hi')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-17/hello/hi');
+                done();
+            });
+    });
+
+    it('should not route to route 17 with just thing', function(done) {
+
+        request(app)
+            .get('/route-17/hello')
+            .expect(404, done);
+    });
+
+    it('should route to route 18 with thing', function(done) {
+
+        request(app)
+            .get('/route-18/hello')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-18/hello?another_thing=another-thing');
+                done();
+            });
+
+    });
+
+    it('should route to route 19 with thing', function(done) {
+
+        request(app)
+            .get('/route-19/hello')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-19/hello');
+                done();
+            });
+
+    });
+
+    it('should route to route 19 without thing', function(done) {
+
+        request(app)
+            .get('/route-19')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-19');
+                done();
+            });
+
+    });
+
+    it('should route to route 20 with the last thing being thing', function(done) {
+
+        request(app)
+            .get('/route-20/hello/hi')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-20/hi/null');
+                done();
+            });
+    });
+
+    it('should route to route 23 with an alpha thing', function(done) {
+
+        request(app)
+            .get('/route-23/hello')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-23/hello');
+                done();
+            });
+    });
+
+    it('should route to route 23 without a thing', function(done) {
+
+        request(app)
+            .get('/route-23')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/route-23');
+                done();
+            });
+    });
+
+    it('should not route to route 23 with a numeric thing', function(done) {
+
+        request(app)
+            .get('/route-23/23')
+            .expect(404, done);
+    });
+
+    it('should route to group 1 route 24 with ok', function(done) {
+
+        request(app)
+            .get('/group-1/route-24')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+
+    });
+
+    it('should route to group 1 route 1 with also-ok', function(done) {
+
+        request(app)
+            .get('/group-1/route-1')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('also-ok');
+                done();
+            });
+
+    });
+
+    it('should route to group 2 route 25 with ok', function(done) {
+
+        request(app)
+            .get('/group-2/route-25')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to group 3 route 26 with ok', function(done) {
+
+        request(app)
+            .get('/group-3/route-26')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to group 4 route 27 with ok', function(done) {
+
+        request(app)
+            .get('/group-4/route-27')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to group 4 group 5 route 28 with ok', function(done) {
+
+        request(app)
+            .get('/group-4/group-5/route-28')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to group 6 route 29', function(done) {
+
+        request(app)
+            .get('/group-6/route-29')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/group-6/route-29');
+                done();
+            });
+    });
+
+    it('should route to group 7 route 30 with middleware response', function(done) {
+
+        request(app)
+            .get('/group-7/route-30')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('group_middleware_1');
+                done();
+            });
+    });
+
+    it('should route to route 31 with middleware response', function(done) {
+
+        request(app)
+            .get('/group-7/route-31')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('group_middleware_1|middleware_1');
+                done();
+            });
+    });
+
+    it('should route to group 8 route 32 with middleware response', function(done) {
+
+        request(app)
+            .get('/group-8/route-32')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('group_middleware_1|group_middleware_2|middleware_1|middleware_2');
+                done();
+            });
+    });
+
+    it('should route to group 9 route 33', function(done) {
+
+        request(app)
+            .get('/group-9/route-33')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/group-9/route-33');
+                done();
+            });
+    });
+
+    it('should route to group 9 group 10 route 34', function(done) {
+
+        request(app)
+            .get('/group-9/group-10/route-34')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('/group-9/group-10/route-34');
+                done();
+            });
+    });
+
+    it('should route to route 35 with ok', function(done) {
+
+        request(app)
+            .post('/route-35')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route 36 with ok', function(done) {
+
+        request(app)
+            .put('/route-36')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route 37 with ok', function(done) {
+
+        request(app)
+            .delete('/route-37')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route 38 with ok', function(done) {
+
+        request(app)
+            .patch('/route-38')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+
+    it('should route to route 39 with ok', function(done) {
+
+        request(app)
+            .options('/route-39')
+            .expect(200)
+            .end(function(err, res){
+
+                if (err) {
+                    throw err;
+                }
+                res.text.should.equal('ok');
+                done();
+            });
+    });
+});
