@@ -4,7 +4,6 @@ var _ = require('lodash');
 var http = require('http');
 var url = require('url');
 var finalhandler = require('finalhandler');
-var parser = require('body-parser');
 var path = require('path');
 var qs = require('qs');
 var send = require('send');
@@ -51,21 +50,31 @@ module.exports = class HttpDriver {
 
             if (!action) {
 
-                for(var u = 0, len = that._to_serve.length; u < len; u++) {
+                action = {
+                    stack: [],
+                    params: {}
+                };
 
-                    var serve = that._to_serve[u];
-                    if (_.startsWith(uri, serve.route)) {
+                if (verb === 'GET') {
 
-                        return serve.handler(uri.replace(serve.route, ''), req, res, function(err) {
-                            if (err) {
-                                errorHandler(err, req, res);
-                            }
-                        });
+                    for(var u = 0, len = that._to_serve.length; u < len; u++) {
+
+                        let serve = that._to_serve[u];
+                        if (_.startsWith(uri, serve.route)) {
+
+                            action.stack.push(function(req, res, next) {
+
+                                serve.handler(uri.replace(serve.route, ''), req, res, next);
+                            });
+                        }
                     }
                 }
-                var err = that.ScenicRoute.factoryConfig().notFoundHandler(uri);
 
-                return errorHandler(err, req, res);
+                action.stack.push(function(req, res, next) {
+
+                    var err = that.ScenicRoute.factoryConfig().notFoundHandler(uri);
+                    next(err);
+                });
             }
 
 
@@ -291,13 +300,42 @@ module.exports = class HttpDriver {
         }
         public_config.root = public_dir;
 
+        _.defaultsDeep(public_config, {
+            redirect: true
+        });
+
+        if (public_config.setHeaders) {
+
+            if (!_.isFunction(public_config.setHeaders)) {
+
+                throw new Error('"setHeaders" must be a function.');
+            }
+        }
+
         return function(uri, req, res, next) {
 
-            send(req, uri, public_config)
-                .on('error', function() {
-                    next(notFoundHandler(uri));
-                })
-                .pipe(res);
+            var stream = send(req, uri, public_config);
+            var forward = false;
+
+            if (public_config.setHeaders) {
+                stream.on('headers', public_config.setHeaders);
+            }
+            if (public_config.fallthrough) {
+                stream.on('file', function() {
+
+                    forward = true;
+                });
+            }
+            stream.on('error', function(err) {
+
+                if (forward) {
+
+                    return next(err);
+                }
+                next();
+            });
+
+            stream.pipe(res);
         };
 
     }

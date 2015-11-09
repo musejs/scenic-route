@@ -5,20 +5,23 @@ var path = require('path');
 var should = require('should');
 var request = require('supertest');
 
-describe('HttpDriver', function() {
+describe('ExpressDriver', function() {
 
     describe('basic routes', function() {
 
         var app;
         var routes = require('../fixtures/routes');
-        var ScenicRoute = require('../../src/factory')();
+        var ExpressDriver = require('../../src/drivers/ExpressDriver');
+        var ScenicRoute = require('../../src/factory')({
+            Driver: ExpressDriver
+        });
 
         before(function(done) {
 
             var route = routes(ScenicRoute);
 
             //console.log(JSON.stringify(ScenicRoute.tree));
-            ScenicRoute.startServer(1337, function(err, server) {
+            ScenicRoute.startServer(1338, function(err, server) {
 
                 app = server;
                 done();
@@ -765,7 +768,7 @@ describe('HttpDriver', function() {
 
             request(app)
                 .get('/route-40')
-                .expect(301, done);
+                .expect(303, done);
         });
 
         it('should route to a file in route 41 with file', function(done) {
