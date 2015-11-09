@@ -1,9 +1,9 @@
 "use strict";
 var _ = require('lodash');
 
-module.exports = function(action) {
+module.exports = function(action, options) {
 
-    if (_.isFunction(action)) {
+    if (_.isFunction(action.closure)) {
 
         return action;
     }

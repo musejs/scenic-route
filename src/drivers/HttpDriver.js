@@ -171,7 +171,6 @@ module.exports = class HttpDriver {
 
 
             if (!to_inspect) {
-
                 return false;
             }
 

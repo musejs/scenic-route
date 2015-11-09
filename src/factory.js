@@ -185,56 +185,59 @@ module.exports = function(config, controllerHandler) {
                 throw new Error('No controller handler given.');
             }
 
-
             if (!controller_options) {
                 controller_options = {};
             }
 
-            var actions = controllerHandler(controller_name, this._options);
+            var actions = controllerHandler(controller_name, this._options, controller_options);
+            var route = this;
 
-            this.group({prefix: uri}, function(route) {
+            _.forEach(Object.keys(actions), function(action) {
 
-                _.forEach(Object.keys(actions), function(action) {
+                _.forEach(route.constructor.verbs, function(verb) {
 
-                    _.forEach(route.constructor.verbs, function(verb) {
+                    if (_.startsWith(action, verb)) {
 
-                        if (_.startsWith(action, verb)) {
+                        var new_uri = uri;
+                        var subroute = _.kebabCase(action.replace(verb, ''));
 
-                            var subroute = _.kebabCase(action.replace(verb, ''));
-
-                            if (subroute == 'index') {
-                                subroute = '';
-                            }
-
-                            var middleware = [];
-                            var name = null;
-
-                            if (controller_options[action]) {
-
-                                if (controller_options[action].middleware) {
-
-                                    middleware = route.constructor.normalizeOptionsMiddleware(controller_options[action]);
-                                }
-
-                                if (controller_options[action].as) {
-
-                                    name = controller_options[action].as;
-                                }
-                            }
-
-                            route[verb]('/'+subroute, {
-                                uses: actions[action],
-                                middleware: middleware,
-                                as: name
-                            });
+                        if (subroute == 'index') {
+                            subroute = '';
                         }
 
-                    });
+                        if (new_uri.indexOf('{}') === -1) {
+
+                            new_uri = path.join(new_uri, '{}');
+                        }
+
+                        new_uri = new_uri.replace('{}', subroute);
+
+                        var middleware = [];
+                        var name = null;
+
+                        if (controller_options[action]) {
+
+                            if (controller_options[action].middleware) {
+
+                                middleware = route.constructor.normalizeOptionsMiddleware(controller_options[action]);
+                            }
+
+                            if (controller_options[action].as) {
+
+                                name = controller_options[action].as;
+                            }
+                        }
+
+                        route[verb](new_uri, {
+                            uses: actions[action],
+                            middleware: middleware,
+                            as: name
+                        });
+                    }
 
                 });
 
             });
-
         }
 
         /**
@@ -308,19 +311,6 @@ module.exports = function(config, controllerHandler) {
                     } else {
                         piece = variable_param_key;
                     }
-                }
-
-                if (!routes[piece]) {
-
-                    routes[piece] = {};
-                }
-
-                if (regex) {
-                    routes[piece].pattern = regex;
-                }
-
-                if (param_name) {
-                    routes[piece].name = param_name;
                 }
 
                 if (!routes[piece]) {
@@ -410,12 +400,12 @@ module.exports = function(config, controllerHandler) {
                 action = action.uses;
             }
 
-            return {
+            return config.actionHandler({
                 middleware: middleware,
-                closure: config.actionHandler(action),
+                closure: action,
                 name: name,
                 where: where
-            };
+            }, this._options);
         }
 
         /**
@@ -564,6 +554,11 @@ module.exports = function(config, controllerHandler) {
         static driver(Driver) {
 
             config.Driver = Driver;
+        }
+
+        static controllerHandler(newControllerHandler) {
+
+            controllerHandler = newControllerHandler;
         }
 
         /**

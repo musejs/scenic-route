@@ -335,7 +335,24 @@ module.exports = function(ScenicRoute) {
     route.serve('/route-42', path.join(public_dir, 'public-3'));
     route.serve('/route-43', path.join(public_dir, 'public-2', 'public-4'));
 
+    route.match(['get', 'post'], '/route-44', ok);
+    route.any('/route-45', ok);
 
+    route.get('/route-46/{thing}/greeting', function(req, res) {
+
+        res.end(req.params['thing']);
+
+    });
+
+    route.group({prefix: 'group-11/{thing}'}, function(route) {
+
+        route.get('/', function(req, res) {
+
+            res.end(req.params['thing']);
+
+        });
+
+    });
 
     return route;
 };
