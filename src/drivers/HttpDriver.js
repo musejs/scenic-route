@@ -301,7 +301,7 @@ module.exports = class HttpDriver {
         public_config.root = public_dir;
 
         _.defaultsDeep(public_config, {
-            redirect: true
+            fallthrough: true
         });
 
         if (public_config.setHeaders) {
@@ -327,6 +327,10 @@ module.exports = class HttpDriver {
                 });
             }
             stream.on('error', function(err) {
+
+                if (err && err.statusCode == 404) {
+                    err = notFoundHandler(uri);
+                }
 
                 if (forward) {
 

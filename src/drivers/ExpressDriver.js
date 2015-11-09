@@ -155,7 +155,7 @@ module.exports = class ExpressDriver {
 
         _.defaultsDeep(public_config, {
             redirect: false,
-            fallthrough: false
+            fallthrough: true
         });
         return this.express.static(public_dir, public_config);
     }
