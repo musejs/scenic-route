@@ -1,7 +1,9 @@
 "use strict";
 var _ = require('lodash');
 var path = require('path');
+var url = require('url');
 var qs = require('qs');
+var send = require('send');
 
 var variable_param_key = Symbol('variable_param');
 var variable_regex_param_key = Symbol('variable_regex_param');
@@ -112,7 +114,47 @@ module.exports = function(config, controllerHandler) {
          */
         serve(uri, public_dir, public_config) {
 
-            var action = config.Driver.publicHandler(public_dir, public_config, config.notFoundHandler);
+            uri = '/'+_.trim(uri, '/');
+
+            if (!public_config) {
+                public_config = {};
+            }
+
+            _.defaultsDeep(public_config, {
+                root: public_dir,
+                directoryHandler: function(req, res, next) {
+
+                    next(notFoundHandler(uri));
+                }
+            });
+
+            var action = function(req, res, next) {
+
+                var path = url.parse(req.url).pathname;
+
+                var stream = send(req, path.replace(uri, ''), public_config);
+
+                if (public_config.headers) {
+                    stream.on('headers', public_config.headers);
+                }
+
+                if (public_config.directoryHandler) {
+                    stream.on('directory', function() {
+
+                        public_config.directoryHandler(req, res, next);
+                    });
+                }
+
+                stream.on('error', function(err) {
+
+                    if (err && err.statusCode == 404) {
+                        err = notFoundHandler(uri);
+                    }
+                    next(err);
+                });
+
+                stream.pipe(res);
+            };
 
             this.route('PUBLIC', uri, action);
         }
@@ -633,10 +675,8 @@ module.exports = function(config, controllerHandler) {
          */
         static parseUri(uri) {
 
-            uri = uri.replace('/', ''); // remove prefixed slashes
-            uri = uri.replace(/\/+$/, ''); // remove trailing slashes
+            uri = '/'+_.trim(uri, '/');
 
-            uri = '/'+uri;
             var pieces = uri.split('/');
 
             pieces[0] = '/';

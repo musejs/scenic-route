@@ -64,7 +64,7 @@ module.exports = class ExpressDriver {
 
                 that.constructor.express_app[verb](route, stack);
             } else {
-                public_routes[route] = stack[stack.length - 1];
+                public_routes[route] = stack;
             }
         });
 
@@ -76,7 +76,7 @@ module.exports = class ExpressDriver {
 
         _.forEach(sorted_public_routes, function(route) {
 
-            that.constructor.express_app.use(route, public_routes[route]);
+            that.constructor.express_app.get(path.join(route, '*'), public_routes[route]);
         });
     }
 
@@ -150,15 +150,5 @@ module.exports = class ExpressDriver {
 
         return new this(ScenicRoute);
     }
-
-    static publicHandler(public_dir, public_config, notFoundHandler) {
-
-        _.defaultsDeep(public_config, {
-            redirect: false,
-            fallthrough: true
-        });
-        return this.express.static(public_dir, public_config);
-    }
-
 };
 

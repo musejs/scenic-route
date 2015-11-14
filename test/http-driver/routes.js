@@ -17,7 +17,6 @@ describe('HttpDriver', function() {
 
             var route = routes(ScenicRoute);
 
-            //console.log(JSON.stringify(ScenicRoute.tree));
             ScenicRoute.startServer(1337, function(err, server) {
 
                 app = server;
@@ -765,7 +764,7 @@ describe('HttpDriver', function() {
 
             request(app)
                 .get('/route-40')
-                .expect(301, done);
+                .expect(404, done);
         });
 
         it('should route to a file in route 41 with file', function(done) {
@@ -988,6 +987,66 @@ describe('HttpDriver', function() {
                     done();
                 });
         });
+
+        it('should route to a file in route 47 with file', function(done) {
+
+            request(app)
+                .get('/route-47/sample-bmp.bmp')
+                .expect(200)
+                .end(function(err, res){
+
+                    if (err) {
+                        throw err;
+                    }
+
+                    fs.readFile(path.join(__dirname,'/../','public', 'public-2', 'sample-bmp.bmp'), { encoding: 'utf8' }, function (err, data ) {
+
+                        new Buffer(res.body).toString().should.equal(data);
+                        done();
+                    });
+                });
+        });
+
+        it('should route to a file in route 48/49 with file', function(done) {
+
+            request(app)
+                .get('/route-48/route-49/sample-bmp.bmp')
+                .expect(200)
+                .end(function(err, res){
+
+                    if (err) {
+                        throw err;
+                    }
+
+                    fs.readFile(path.join(__dirname,'/../','public', 'public-2', 'sample-bmp.bmp'), { encoding: 'utf8' }, function (err, data ) {
+
+                        new Buffer(res.body).toString().should.equal(data);
+                        done();
+                    });
+                });
+        });
+
+        it('should route to a file in route 50 with file', function(done) {
+
+            request(app)
+                .get('/route-50/sample-bmp.bmp')
+                .expect(200)
+                .end(function(err, res){
+
+                    if (err) {
+                        throw err;
+                    }
+
+                    fs.readFile(path.join(__dirname,'/../','public', 'public-2', 'sample-bmp.bmp'), { encoding: 'utf8' }, function (err, data ) {
+
+                        new Buffer(res.body).toString().should.equal(data);
+                        done();
+                    });
+                });
+        });
+
+
+
     });
 
 });

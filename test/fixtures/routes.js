@@ -351,8 +351,12 @@ module.exports = function(ScenicRoute) {
             res.end(req.params['thing']);
 
         });
-
     });
+
+    route.serve('route-47', path.join(public_dir, 'public-2'));
+    route.serve('route-48/route-49', path.join(public_dir, 'public-2'));
+    route.serve('route-50', path.join(public_dir, 'public-2'));
+
 
     return route;
 };

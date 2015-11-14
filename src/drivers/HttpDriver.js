@@ -62,10 +62,7 @@ module.exports = class HttpDriver {
                         let serve = that._to_serve[u];
                         if (_.startsWith(uri, serve.route)) {
 
-                            action.stack.push(function(req, res, next) {
-
-                                serve.handler(uri.replace(serve.route, ''), req, res, next);
-                            });
+                            action.stack.push(serve.handler);
                         }
                     }
                 }
@@ -99,7 +96,6 @@ module.exports = class HttpDriver {
 
                     } catch(err) {
 
-                        //console.log(err);
                         err.message = err.message || 'An unknown error occurred.';
                         err.status = err.status || 500;
                         next(err);
@@ -293,57 +289,6 @@ module.exports = class HttpDriver {
         return new this(ScenicRoute);
     }
 
-    static publicHandler(public_dir, public_config, notFoundHandler) {
-
-        if (!public_config) {
-            public_config = {};
-        }
-        public_config.root = public_dir;
-
-        _.defaultsDeep(public_config, {
-            fallthrough: true
-        });
-
-        if (public_config.setHeaders) {
-
-            if (!_.isFunction(public_config.setHeaders)) {
-
-                throw new Error('"setHeaders" must be a function.');
-            }
-        }
-
-        return function(uri, req, res, next) {
-
-            var stream = send(req, uri, public_config);
-            var forward = false;
-
-            if (public_config.setHeaders) {
-                stream.on('headers', public_config.setHeaders);
-            }
-            if (public_config.fallthrough) {
-                stream.on('file', function() {
-
-                    forward = true;
-                });
-            }
-            stream.on('error', function(err) {
-
-                if (err && err.statusCode == 404) {
-                    err = notFoundHandler(uri);
-                }
-
-                if (forward) {
-
-                    return next(err);
-                }
-                next();
-            });
-
-            stream.pipe(res);
-        };
-
-    }
-
     static errorHandlerFactory(error_middleware) {
 
         return function (err, req, res) {
@@ -362,7 +307,6 @@ module.exports = class HttpDriver {
 
                     } catch(err) {
 
-                        //console.log(err);
                         err.message = err.message || 'An unknown error occurred.';
                         err.status = err.status || 500;
                         next(err);
