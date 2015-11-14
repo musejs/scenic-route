@@ -38,8 +38,9 @@ module.exports = class ExpressDriver {
         });
 
         var server = this.constructor.express_app.listen(port, function () {
-
-            callback(null, server);
+            if (callback) {
+                callback(null, server);
+            }
         });
 
     }

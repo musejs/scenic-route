@@ -113,8 +113,9 @@ module.exports = class HttpDriver {
 
         server.listen(port, function(){
 
-            callback(null, server);
-
+            if (callback) {
+                callback(null, server);
+            }
         });
 
     }
