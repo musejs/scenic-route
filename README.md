@@ -59,21 +59,21 @@ Once the factory function is called, it will return a `ScenicRoute` class, which
 route instance with which to define routes.  This can be done by calling either `new ScenicRoute(options)`
 or `ScenicRoute.make(options)`.
 
-- The `options` argument is an optional plain javascript object, with the following optional parameters:
-    - `prefix`: the route prefix to add to all routes defined with this instance
-    - `middleware`: an array or single function of Connect-style middleware
-    - `namespace`: iif using controllers, controllers will belong to this namespace
-    - `name`: prefixed to the names of any named routes defined with this instance
+The `options` argument is an optional plain javascript object, with the following optional parameters:
+- `prefix`: the route prefix to add to all routes defined with this instance
+- `middleware`: an array or single function of Connect-style middleware
+- `namespace`: iif using controllers, controllers will belong to this namespace
+- `name`: prefixed to the names of any named routes defined with this instance
 
 Routes are defined using the route instance object, which has methods that correspond to each supported HTTP verb 
 (`get`, `post`, `put`, `delete`, `patch`, `options`).  Each of these methods accept the same arguments: `uri`, and `action`.
-`uri` is the route you wish to match, e.g. "/hello-world"
+`uri` is the route you wish to match, e.g. "/hello-world", while 
 `action` can be either a Connect-style function whose arguments are `req` and `res`, 
 or a plain javascript object with the following keys:
-    - `uses` - the Connect-style function that serves as the action
-    - `middleware` (optional) - an array or single function of Connect-style middleware to run before the action
-    - `name` (optional) - names this route, which can then be used to generate URLs to this route, using the static method `SceniceRoute.url(name)`
-    - `where` (optional) - a plain javascript object whose keys are route params, and values are a regex (RegExp object, regex literal, or a regex string) to constrain the param to
+- `uses` - the Connect-style function that serves as the action
+- `middleware` (optional) - an array or single function of Connect-style middleware to run before the action
+- `name` (optional) - names this route, which can then be used to generate URLs to this route, using the static method `SceniceRoute.url(name)`
+- `where` (optional) - a plain javascript object whose keys are route params, and values are a regex (RegExp object, regex literal, or a regex string) to constrain the param to
     
 When all routes have been defined, the static method `ScenicRoute.listen` can then be called to start the server at the specified port.
 
