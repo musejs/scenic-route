@@ -70,10 +70,10 @@ Routes are defined using the route instance object, which has methods that corre
 `uri` is the route you wish to match, e.g. "/hello-world", while 
 `action` can be either a Connect-style function whose arguments are `req` and `res`, 
 or a plain javascript object with the following keys:
-- `uses` - the Connect-style function that serves as the action
-- `middleware` (optional) - an array or single function of Connect-style middleware to run before the action
-- `name` (optional) - names this route, which can then be used to generate URLs to this route, using the static method `SceniceRoute.url(name)`
-- `where` (optional) - a plain javascript object whose keys are route params, and values are a regex (RegExp object, regex literal, or a regex string) to constrain the param to
+- `uses` - a required Connect-style function that serves as the action
+- `middleware` - an optional array or single function of Connect-style middleware to run before the action
+- `name` - an optional string that names this route, which can then be used to generate URLs to this route, using the static method `SceniceRoute.url(name)`
+- `where` - an optional plain javascript object whose keys are route params, and values are a regex (RegExp object, regex literal, or a regex string) to constrain the param to
     
 When all routes have been defined, the static method `ScenicRoute.listen` can then be called to start the server at the specified port.
 
