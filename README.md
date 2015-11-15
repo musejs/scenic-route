@@ -165,7 +165,7 @@ route.get('/user/{identifier}', {
         res.end('Your id is '+ req.params.identifier);
     },
     where: {
-        identifier: /^[A-Za-z]+$/
+        identifier: /^\d+$/
     }
 });
 
