@@ -38,7 +38,7 @@ module.exports = function(ScenicRoute) {
 
     route.get('/route-10', {
         uses: ok,
-        as: 'route-ten'
+        name: 'route-ten'
     });
 
     route.get('/route-11', {
@@ -78,7 +78,7 @@ module.exports = function(ScenicRoute) {
     });
 
     route.get('/route-14/{thing}', {
-        as: 'route-fourteen',
+        name: 'route-fourteen',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-fourteen', {
@@ -88,7 +88,7 @@ module.exports = function(ScenicRoute) {
     });
 
     route.get('/route-15/{thing}', {
-        as: 'route-fifteen',
+        name: 'route-fifteen',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-fifteen', {
@@ -101,7 +101,7 @@ module.exports = function(ScenicRoute) {
     });
 
     route.get('/route-16/{thing}', {
-        as: 'route-sixteen',
+        name: 'route-sixteen',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-sixteen', {
@@ -114,7 +114,7 @@ module.exports = function(ScenicRoute) {
     });
 
     route.get('/route-17/{thing}/{another_thing}', {
-        as: 'route-seventeen',
+        name: 'route-seventeen',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-seventeen', {
@@ -125,7 +125,7 @@ module.exports = function(ScenicRoute) {
     });
 
     route.get('/route-18/{thing}', {
-        as: 'route-eighteen',
+        name: 'route-eighteen',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-eighteen', {
@@ -136,7 +136,7 @@ module.exports = function(ScenicRoute) {
     });
 
     route.get('/route-19/{thing?}', {
-        as: 'route-nineteen',
+        name: 'route-nineteen',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-nineteen', {
@@ -146,7 +146,7 @@ module.exports = function(ScenicRoute) {
     });
 
     route.get('/route-20/{thing}/{thing}', {
-        as: 'route-twenty',
+        name: 'route-twenty',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-twenty', {
@@ -157,7 +157,7 @@ module.exports = function(ScenicRoute) {
 
 
     route.get('/route-23/{thing?}', {
-        as: 'route-twenty-three',
+        name: 'route-twenty-three',
         uses: function(req, res) {
 
             res.end(ScenicRoute.url('route-twenty-three', {
@@ -205,7 +205,7 @@ module.exports = function(ScenicRoute) {
     route.group({prefix: '/group-6'}, function(route) {
 
         route.get('route-29', {
-            as: 'route-twenty-nine',
+            name: 'route-twenty-nine',
             uses: function(req, res) {
 
                 res.end(ScenicRoute.url('route-twenty-nine', {
@@ -225,7 +225,7 @@ module.exports = function(ScenicRoute) {
             req.from_group_middleware = 'group_middleware_1';
             next();
         },
-        as: 'group-seven|'
+        name: 'group-seven|'
     }, function(route) {
 
         route.get('/route-30', {
@@ -233,7 +233,7 @@ module.exports = function(ScenicRoute) {
 
                 res.end(ScenicRoute.url('group-seven|route-thirty'));
             },
-            as: 'route-thirty'
+            name: 'route-thirty'
         });
     });
 
@@ -244,7 +244,7 @@ module.exports = function(ScenicRoute) {
             req.from_middleware = 'group_middleware_1';
             next();
         },
-        as: 'group-seven|'
+        name: 'group-seven|'
     }, function(route) {
 
         route.get('/route-30', {
@@ -281,7 +281,7 @@ module.exports = function(ScenicRoute) {
                 next();
             }
         ],
-        as: 'group-eight|'
+        name: 'group-eight|'
     }, function(route) {
 
         route.get('/route-32', {
@@ -304,22 +304,22 @@ module.exports = function(ScenicRoute) {
         });
     });
 
-    route.group({prefix: '/group-9', as: 'group-nine|'}, function(route) {
+    route.group({prefix: '/group-9', name: 'group-nine|'}, function(route) {
 
         route.get('/route-33', {
             uses: function(req, res) {
                 res.end(ScenicRoute.url('group-nine|route-thirty-three'));
             },
-            as: 'route-thirty-three'
+            name: 'route-thirty-three'
         });
 
-        route.group({prefix: '/group-10', as: 'group-ten|'}, function(route) {
+        route.group({prefix: '/group-10', name: 'group-ten|'}, function(route) {
 
             route.get('/route-34', {
                 uses: function(req, res) {
                     res.end(ScenicRoute.url('group-nine|group-ten|route-thirty-four'));
                 },
-                as: 'route-thirty-four'
+                name: 'route-thirty-four'
             });
         });
     });

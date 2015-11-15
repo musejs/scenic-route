@@ -205,7 +205,7 @@ module.exports = function(config, controllerHandler) {
                 prefix: path.join(this._options.prefix, group_options.prefix),
                 middleware: this._options.middleware.concat(group_options.middleware),
                 namespace: path.join(this._options.namespace, group_options.namespace),
-                as: this._options.as + group_options.as
+                name: this._options.name + group_options.name
             };
 
             closure(this.constructor.make(new_options));
@@ -264,16 +264,16 @@ module.exports = function(config, controllerHandler) {
                                 middleware = route.constructor.normalizeOptionsMiddleware(controller_options[action]);
                             }
 
-                            if (controller_options[action].as) {
+                            if (controller_options[action].name) {
 
-                                name = controller_options[action].as;
+                                name = controller_options[action].name;
                             }
                         }
 
                         route[verb](new_uri, {
                             uses: actions[action],
                             middleware: middleware,
-                            as: name
+                            name: name
                         });
                     }
 
@@ -379,7 +379,7 @@ module.exports = function(config, controllerHandler) {
 
             routes[piece].stack = this._options.middleware
                 .concat(action_description.middleware)
-                .concat(action_description.closure);
+                .concat(action_description.uses);
 
             if (action_description.name) {
                 this.constructor.names[action_description.name] = pieces.join('/').replace('/', '');
@@ -418,10 +418,10 @@ module.exports = function(config, controllerHandler) {
                     middleware = this.constructor.normalizeOptionsMiddleware(action);
                 }
 
-                if (action.as) {
-                    name = action.as;
-                    if (this._options.as) {
-                        name = this._options.as + name;
+                if (action.name) {
+                    name = action.name;
+                    if (this._options.name) {
+                        name = this._options.name + name;
                     }
                 }
 
@@ -444,7 +444,7 @@ module.exports = function(config, controllerHandler) {
 
             return config.actionHandler({
                 middleware: middleware,
-                closure: action,
+                uses: action,
                 name: name,
                 where: where
             }, this._options);
@@ -701,7 +701,7 @@ module.exports = function(config, controllerHandler) {
             options.prefix = options.prefix || '/';
             options.middleware = options.middleware || [];
             options.namespace = options.namespace || '';
-            options.as = options.as || '';
+            options.name = options.name || '';
 
             if (!_.isArray(options.middleware)) {
                 options.middleware = [options.middleware];

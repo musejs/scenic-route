@@ -3,7 +3,7 @@ var _ = require('lodash');
 
 module.exports = function(action, options) {
 
-    if (_.isFunction(action.closure)) {
+    if (_.isFunction(action.uses)) {
 
         return action;
     }

@@ -3,7 +3,6 @@
 var _ = require('lodash');
 var path = require('path');
 var express = require('express');
-var parser = require('body-parser');
 
 module.exports = class ExpressDriver {
 

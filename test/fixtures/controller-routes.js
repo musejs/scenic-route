@@ -40,9 +40,9 @@ function controllerHandler(controller_name, options, controller_options) {
 
 function actionHandler(action, options) {
 
-    if (_.isString(action.closure)) {
+    if (_.isString(action.uses)) {
 
-        var pieces = action.closure.split('@');
+        var pieces = action.uses.split('@');
 
         if (pieces.length != 2) {
             throw new Error('Controller action must be in the format "[controller_name]@[method]".');
@@ -56,10 +56,10 @@ function actionHandler(action, options) {
         var Controller = require(controller_path);
         var controller = new Controller();
 
-        action.closure = controller[method];
+        action.uses = controller[method];
     }
 
-    if (_.isFunction(action.closure)) {
+    if (_.isFunction(action.uses)) {
 
         return action;
     }
@@ -83,7 +83,7 @@ module.exports = function(ScenicRoute) {
                 req.params['addition'] = 'yo';
                 res.end(ScenicRoute.url('controller-2-greeting', req.params));
             },
-            as: 'controller-2-greeting'
+            name: 'controller-2-greeting'
         }
     });
 
