@@ -221,7 +221,7 @@ route.get('/foo', {
 
 ### Named Routes
 
-You can name routes to easily generate URLs to them, using `ScenicRoute.url(name, params)`.
+You can name routes to easily generate URLs to them, using `ScenicRoute.url(name, params)`, where `params` is optional.
 ```
 route.get('/foo', {
     uses: function(req, res) {
