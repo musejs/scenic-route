@@ -100,7 +100,7 @@ route.get('/hello-world', {
 The route instance has methods for each HTTP verb (`get`, `post`, `put`, `delete`, `patch`, `options`).
 ```
 /*
- * This route will only match POST requests to /hello-world
+ * This route will only match POST requests to "/hello-world"
  */
 route.post('/hello-world', function(req, res) {
     
@@ -183,6 +183,9 @@ route.get('/user/{identifier}', {
 #### Optional parameters
 Optional parameters can be specified by curly braces and a question mark (`{...?}`).  They must be the last segment in the uri, or an error will be thrown.
 ```
+/*
+ * This will match for "/hello/Shaun" and "/hello"
+ */
 route.get('/hello/{name?}', function(req, res) {
 
     var name = req.params.name || 'Anonymous';
