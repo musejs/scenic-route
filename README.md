@@ -422,7 +422,7 @@ var public_dir = path.join(__dirname,'/../public/uploads');
 route.serve('/uploads', public_dir);
 ```
 More complex functionality can be accomplished by using `public_config`, which is a plain javascript object of options.
-The options can be found [here](https://github.com/pillarjs/send#options)
+The options can be found [here](https://github.com/pillarjs/send#options).
 
 Additionally, scenic-route adds the following options:
 - `headers` - a function of signature `function(res, path, stat) {}` that can be used to set headers
@@ -446,11 +446,243 @@ var public_config = {
  * If a directory is requested, it will redirect to home.
  */
 route.serve('/uploads', public_dir, public_config);
-
 ```
 
+### Controller Support
+
+Typically, you'd want your router to have some knowledge of your controllers, so that you could specify controller actions,
+rather than supplying closures.  This router makes no assumptions about how your controllers are structured or invoked,
+so this knowledge must be supplied.
+
+One such place this knowledge is supplied to is the `actionHandler`, which is a function that is used to perform some additional work on the actions specified in route definitions.
+It can be supplied either as a config option in the scenic-route factory function, or if you already have
+a `ScenicRoute` class, by supplying it to `ScenicRoute.actionHandler(closure)`.
+
+The default `actionHandler` simply checks if `action.uses` is a function.  If not, it throws an error.  To support controllers,
+you'll most likely want to change this behavior to allow `action.uses` to be a string, so that you can define routes like this:
+```
+/*
+ * This will call the IndexController's "greeting" method.
+ */
+route.get('/hello', 'IndexController@greeting');
+```
+
+As an example, let's assume your controllers are ES6 classes, where each method in the class is an action:
+```
+class IndexController {
+
+    greeting(req, res) {
+
+        res.end('hi');
+    }
+}
+```
+To support this setup, you could change `actionHandler` like so:
+```
+function actionHandler(action, options) {
+
+    if (_.isString(action.uses)) {
+
+        var pieces = action.uses.split('@');
+
+        if (pieces.length != 2) {
+            throw new Error('Controller action must be in the format "[controller_name]@[method]".');
+        }
+
+        var controller_name = _.trim(pieces[0]);
+        var method = _.trim(pieces[1]);
+
+        var controller_path = path.join(__dirname, 'controllers', options.namespace, controller_name);
+
+        var Controller = require(controller_path);
+        var controller = new Controller();
+
+        action.uses = controller[method];
+    }
+
+    if (_.isFunction(action.uses)) {
+
+        return action;
+    }
+
+    throw new Error('Cannot determine action.');
+}
+
+var ScenicRoute = require('scenic-route')({
+    actionHandler: actionHandler
+});
+
+var route = ScenicRoute.make();
+
+/*
+ * This will call the IndexController's "greeting" method.
+ */
+route.get('/hello', 'IndexController@greeting');
+
+```
+The above action handler can accept a string as an action, in which case, it parses the string into a controller and it's method (separated by "@").
+It then loads the controller from the `controllers` directory, and sets `action.uses` to the appropriate controller method.
+
+You may have also noticed that the handler takes into account `options.namespace` when loading the controller, 
+where in this case, if a controller belongs to a particular namespace, it means that it is in the subdirectory named after that namespace.
+
+### Advanced Controller Support
+
+There is a convenience method `route.controller(uri, controller_name, controller_options)`, which takes a controller,
+and makes routes for each of its methods, provided that its methods are named with the camel-case convention as {verb}{Action}.
+
+For example, assume this controller:
+```
+class GreetingController {
+
+    getHi(req, res) {
+
+        res.end('hi');
+    }
+    
+    getHello(req, res) {
+
+        res.end('hello');
+    }
+    
+    getHola(req, res) {
+
+        res.end('hola');
+    }
+
+}
+```
+Instead of creating these routes:
+```
+route.get('/greeting/hi', 'GreetingController@getHi');
+route.get('/greeting/hello', 'GreetingController@getHello');
+route.get('/greeting/hola', 'GreetingController@getHola');
+```
+You can simply use `route.controller`:
+```
+route.controller('/greeting', 'GreetingController');
+```
+
+The `route.controller` method takes the uri, then appends the ["kebab-case"](https://lodash.com/docs#kebabCase) version of each method
+found in that controller, using the appropriate verb.  If you don't want the method to be appended to the end of the uri, you can specify
+where you'd like it using an empty parameter placeholder: `{}`
+```
+route.controller('/greeting/{}/welcome', 'GreetingController');
+```
+The above will create routes equivalent to:
+```
+route.get('/greeting/hi/welcome', 'GreetingController@getHi');
+route.get('/greeting/hello/welcome', 'GreetingController@getHello');
+route.get('/greeting/hola/welcome', 'GreetingController@getHola');
+```
+You can of course also use regular route parameters as well:
+```
+route.controller('/greeting/{}/{name}', 'GreetingController');
+```
+The above will create routes equivalent to:
+```
+route.get('/greeting/hi/{name}', 'GreetingController@getHi');
+route.get('/greeting/hello/{name}', 'GreetingController@getHello');
+route.get('/greeting/hola/{name}', 'GreetingController@getHola');
+```
+
+#### Controller Options
+
+You may supply addition options for a controller method by providing it as the third argument to `route.controller`.
+The `controller_options` must be a plain javascript object whose keys are the method names, and the values are a plain
+javascript object with optional keys of `middleware` and `name`.
+```
+var controller_options = {
+    getHi: {
+        middleware: function(req, res, next) {
+            ...
+            next();
+        }
+    },
+    getHola: {
+        name: 'spanish-hello'
+    }
+};
+route.controller('/greeting', 'GreetingController', controller_options);
+```
+The above route definition adds a middleware specific to "greeting/hi", and also names "greeting/hola" as "spanish-hello".
+
+#### Enabling `route.controller`
+
+In order to enable `route.controller` support, you must supply a `controllerHandler`, 
+which is a function that is provided with a controller's name, and must then generate a plain javascript object, 
+whose keys are the method names of the controller, and values are the action action function.
+
+A `controllerHandler` can be supplied either as the second argument in the scenic-route factory function, or if you already have
+a `ScenicRoute` class, by supplying it to `ScenicRoute.controllerHandler(closure)`.
+```
+function controllerHandler(controller_name, options, controller_options) {
+
+    var controller_path = path.join(__dirname, 'controllers', options.namespace, controller_name);
+
+    var Controller = require(controller_path);
+    var controller = new Controller();
+
+    var methods = getInstanceMethods(Controller);
+
+    var actions = {};
+
+    _.forEach(methods, function(method) {
+
+        actions[method] = function(req, res) {
+
+            return controller[method](req, res);
+        };
+    });
+
+    return actions;
+}
+
+ScenicRoute.controllerHandler(controllerHandler);
+var route = ScenicRoute.make();
+
+route.controller('/greeting', 'GreetingController');
+```
+The above `controllerHandler` first loads the controller based on its name and namespace (or lack of).  It then finds the instance methods
+of the controller, and finally, for each of those methods, it maps to an action function that calls the appropriate controller method.
 
 ## API
+
+#### `route.get(uri, action)`
+Routes a GET request for a `uri` to an `action`.
+
+#### `route.post(uri, action)`
+Routes a POST request for a `uri` to an `action`.
+
+#### `route.put(uri, action)`
+Routes a PUT request for a `uri` to an `action`.
+
+#### `route.delete(uri, action)`
+Routes a DELETE request for a `uri` to an `action`.
+
+#### `route.patch(uri, action)`
+Routes a PATCH request for a `uri` to an `action`.
+
+#### `route.options(uri, action)`
+Routes an OPTIONS request for a `uri` to an `action`.
+
+#### `route.serve(uri, public_dir, public_config)`
+Routes a GET request for a file in `public_dir`, under `uri`.
+
+More details [here](#serving-public-files).
+
+#### `route.match(verbs, uri, action)`
+For each of the verbs specified, routes a request for a `uri` to an `action`.
+
+#### `route.any(uri, action)`
+Routes a request for a `uri` to an `action` for any verb.
+
+#### `route.group(group_options, closure)`
+Creates a grouping of routes.
+
+More details [here](#route-groups).
+
+
 
 ## Advanced Usage
 
