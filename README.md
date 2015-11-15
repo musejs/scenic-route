@@ -8,7 +8,7 @@ This is not, however, a direct port.  Besides the obvious difference that one is
 in PHP and the other is in node.js, scenic-route's implementation logic is its own, and adheres to the conventions found
 in other musejs components.
 
-One of the musejs conventions found here is the concept of drivers.  Scenic-route ships with two: HttpDriver and ExpressDriver.
+One musejs convention found here is the concept of drivers.  Scenic-route ships with two: HttpDriver and ExpressDriver.
 HttpDriver is the default, and it is *fast*.  Its tree-based structure is approximately 15% faster than Express.js,
 while accommodating for almost every use-case of Express.
 
@@ -114,8 +114,6 @@ Route parameters are segments of the url that can act as variables.  These segme
 in the route definition.  The captured values are made available to `req` via `req.params`, which is a plain javascript
 object whose keys are the names of the route parameters.
 
-#### Basic
-Captures the "name" parameter and makes it available as `req.params.name`.
 ```
 route.get('/hello/{name}', function(req, res) {
     
