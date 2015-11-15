@@ -412,6 +412,42 @@ route.group({prefix: '/foo', middleware: m, name: 'foo-'}, function(route) {
 
 Files out of a directory can be served using `route.serve(uri, public_dir, public_config)`, where `public_config` is optional.
 
+```
+var public_dir = path.join(__dirname,'/../public/uploads');
+
+/*
+ * All files found in the "/public/uploads" directory
+ * will now be available under the "uploads/*" route.
+ */
+route.serve('/uploads', public_dir);
+```
+More complex functionality can be accomplished by using `public_config`, which is a plain javascript object of options.
+The options can be found [here](https://github.com/pillarjs/send#options)
+
+Additionally, scenic-route adds the following options:
+- `headers` - a function of signature `function(res, path, stat) {}` that can be used to set headers
+- `directoryHandler` - a function of signature `function(req, res, next) {}` that will be called whenever a directory is requested
+    - the default currently defers to the `notFoundHandler`
+```
+var public_dir = path.join(__dirname,'/../public/uploads');
+
+var public_config = {
+    directoryHandler: function(req, res, next) {
+        
+        res.writeHead(302, {
+          'Location': 'http://localhost'
+          //add other headers here...
+        });
+        res.end();
+    }
+};
+
+/*
+ * If a directory is requested, it will redirect to home.
+ */
+route.serve('/uploads', public_dir, public_config);
+
+```
 
 
 ## API
