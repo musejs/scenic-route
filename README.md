@@ -110,7 +110,7 @@ route.post('/hello-world', function(req, res) {
 
 ### Route Parameters
 
-Route parameters are segments of the url that can act as variables.  These segments are specified by curly braces `{}`
+Route parameters are segments of the url that can act as variables.  These segments are specified by curly braces `{...}`
 in the route definition.  The captured values are made available to `req` via `req.params`, which is a plain javascript
 object whose keys are the names of the route parameters.
 
@@ -181,7 +181,7 @@ route.get('/user/{identifier}', {
 ```
 
 #### Optional parameters
-Optional parameters can be specified by curly braces and a question mark (`{?}`).  They must be the last segment in the uri, or an error will be thrown.
+Optional parameters can be specified by curly braces and a question mark (`{...?}`).  They must be the last segment in the uri, or an error will be thrown.
 ```
 route.get('/hello/{name?}', function(req, res) {
 
