@@ -177,6 +177,19 @@ route.get('/user/{identifier}', {
     }
 });
 ```
+You may also specify "global" constraints, which will take effect every time that param is found.
+```
+ScenicRoute.pattern('user_id', /^\d+$/);
+
+route.get('/user/{user_id}', function(req, res) {
+    ...
+});
+
+route.post('/user/{user_id}/pet', function(req, res) {
+    ...
+});
+```
+Both of the above routes will have the constraint that "user_id" must be numeric.
 
 #### Optional parameters
 Optional parameters can be specified by curly braces and a question mark (`{...?}`).  They must be the last segment in the uri, or an error will be thrown.
@@ -448,14 +461,135 @@ var public_config = {
 route.serve('/uploads', public_dir, public_config);
 ```
 
+## API
+
+#### `route.get(uri, action)`
+Routes a GET request for a `uri` to an `action`.
+
+#### `route.post(uri, action)`
+Routes a POST request for a `uri` to an `action`.
+
+#### `route.put(uri, action)`
+Routes a PUT request for a `uri` to an `action`.
+
+#### `route.delete(uri, action)`
+Routes a DELETE request for a `uri` to an `action`.
+
+#### `route.patch(uri, action)`
+Routes a PATCH request for a `uri` to an `action`.
+
+#### `route.options(uri, action)`
+Routes an OPTIONS request for a `uri` to an `action`.
+
+#### `route.serve(uri, public_dir, public_config)`
+Routes a GET request for a file in `public_dir`, under `uri`.
+
+More details [here](#serving-public-files).
+
+#### `route.match(verbs, uri, action)`
+For each of the verbs specified, routes a request for a `uri` to an `action`.
+
+#### `route.any(uri, action)`
+Routes a request for a `uri` to an `action` for any verb.
+
+#### `route.group(group_options, closure)`
+Creates a grouping of routes.
+
+More details [here](#route-groups).
+
+#### `route.controller(uri, controller_name, controller_options)`
+Creates routes based on the controller.
+
+More details [here](#advanced-controller-support).
+
+#### `ScenicRoute.make(config, controllerHandler)`
+Creates a new route instance.
+
+#### `ScenicRoute.pattern(param, pattern)`
+Associates a route param with a regex pattern. Each time this route param is found in a route definition, it will be
+constrained by the supplied regex pattern.
+
+More details [here](#regex-constraints).
+
+#### `ScenicRoute.startServer(port, callback)`
+Starts the server at the specified port.  The `callback` has the signature `function(err, server) {}`.
+
+#### `ScenicRoute.url(name, params)`
+Generates a url to a named route.
+
+More details [here](#named-routes).
+
+### `ScenicRoute.addErrorMiddleware(errorMiddleware)`
+Adds middleware to a stack that will be called whenever an error occurs in an action or in its middleware.
+
+This middleware is of the signature `function(err, req, res, next) {}`.
+
+More details [here](#error-handling-middleware).
+
+#### `ScenicRoute.actionHandler(closure)`
+Sets a new `actionHandler` function.
+
+More details [here](#controller-support).
+
+#### `ScenicRoute.middlewareHandler(middleware)`
+Sets a new `middlewareHandler` function.
+
+#### `ScenicRoute.notFoundHandler(closure)`
+Sets a new `notFoundHandler` function.
+
+#### `ScenicRoute.driver(Driver)`
+Sets a new driver.
+
+#### `ScenicRoute.controllerHandler(closure)`
+Sets a new `controllerHandler` function.
+
+More details [here](#advanced-controller-support).
+
+
+## Advanced Usage
+
+### The factory function
+
+The full factory function with all its (optional) arguments are as follows:
+```
+var ScenicRoute = require('scenic-route')(config, controllerHandler);
+```
+
+`config` is an object that can be used to override the defaults used. Any and all properties supplied are optional.
+Under the hood, [_.defaultsDeep](https://lodash.com/docs#defaultsDeep) is used. Here's the full possible structure:
+```
+{
+    actionHandler: function(action, options) {},
+    middlewareHandler: function(middleware) {},
+    notFoundHandler: function(uri) {},
+    Driver: Driver
+}
+```
+
+`actionHandler` is a function that can be used to perform additional logic on actions. Afterwards, it should return the action object.
+It can be used to provide controller support, as described [here](#controller-support), to inject dependencies into actions,
+or any other manipulation to the action object.
+
+`middlewareHandler` is similar to `actionHandler`, except it operates on middleware.
+
+`notFoundHandler` is called whenever a requested route is not found.  It should return an object that will act as the error.
+This error will be called by `next(err)`, and as such will kick off the chain of error-handling middleware, as all errors that are passed to 
+`next` do.
+
+`Driver` is any class/object that adheres to the ScenicRouteDriver contract.  HttpDriver and ExpressDriver both ship with scenic-route.
+
+### Error-handling Middleware
+
+
+
 ### Controller Support
 
 Typically, you'd want your router to have some knowledge of your controllers, so that you could specify controller actions,
-rather than supplying closures.  This router makes no assumptions about how your controllers are structured or invoked,
-so this knowledge must be supplied.
+rather than closures in your route definitions.  This router makes no assumptions about how your controllers are structured or invoked,
+so this knowledge must first be given to scenic-route.
 
-One such place this knowledge is supplied to is the `actionHandler`, which is a function that is used to perform some additional work on the actions specified in route definitions.
-It can be supplied either as a config option in the scenic-route factory function, or if you already have
+One such place this knowledge is supplied is the `actionHandler`, which is a function that is used to perform some additional work on the actions specified in route definitions.
+It can be supplied either as a `config` option in the scenic-route factory function, or if you already have
 a `ScenicRoute` class, by supplying it to `ScenicRoute.actionHandler(closure)`.
 
 The default `actionHandler` simply checks if `action.uses` is a function.  If not, it throws an error.  To support controllers,
@@ -588,7 +722,7 @@ route.get('/greeting/hola/{name}', 'GreetingController@getHola');
 
 #### Controller Options
 
-You may supply addition options for a controller method by providing it as the third argument to `route.controller`.
+You may supply additional options for a controller method by providing it as the third argument to `route.controller`.
 The `controller_options` must be a plain javascript object whose keys are the method names, and the values are a plain
 javascript object with optional keys of `middleware` and `name`.
 ```
@@ -605,13 +739,13 @@ var controller_options = {
 };
 route.controller('/greeting', 'GreetingController', controller_options);
 ```
-The above route definition adds a middleware specific to "greeting/hi", and also names "greeting/hola" as "spanish-hello".
+The above route definition adds a middleware specific to "/greeting/hi", and also names "/greeting/hola" as "spanish-hello".
 
 #### Enabling `route.controller`
 
 In order to enable `route.controller` support, you must supply a `controllerHandler`, 
 which is a function that is provided with a controller's name, and must then generate a plain javascript object, 
-whose keys are the method names of the controller, and values are the action action function.
+whose keys are the method names of the controller, and values are the action function.
 
 A `controllerHandler` can be supplied either as the second argument in the scenic-route factory function, or if you already have
 a `ScenicRoute` class, by supplying it to `ScenicRoute.controllerHandler(closure)`.
@@ -629,10 +763,7 @@ function controllerHandler(controller_name, options, controller_options) {
 
     _.forEach(methods, function(method) {
 
-        actions[method] = function(req, res) {
-
-            return controller[method](req, res);
-        };
+        actions[method] = controller[method];
     });
 
     return actions;
@@ -646,276 +777,10 @@ route.controller('/greeting', 'GreetingController');
 The above `controllerHandler` first loads the controller based on its name and namespace (or lack of).  It then finds the instance methods
 of the controller, and finally, for each of those methods, it maps to an action function that calls the appropriate controller method.
 
-## API
 
-#### `route.get(uri, action)`
-Routes a GET request for a `uri` to an `action`.
-
-#### `route.post(uri, action)`
-Routes a POST request for a `uri` to an `action`.
-
-#### `route.put(uri, action)`
-Routes a PUT request for a `uri` to an `action`.
-
-#### `route.delete(uri, action)`
-Routes a DELETE request for a `uri` to an `action`.
-
-#### `route.patch(uri, action)`
-Routes a PATCH request for a `uri` to an `action`.
-
-#### `route.options(uri, action)`
-Routes an OPTIONS request for a `uri` to an `action`.
-
-#### `route.serve(uri, public_dir, public_config)`
-Routes a GET request for a file in `public_dir`, under `uri`.
-
-More details [here](#serving-public-files).
-
-#### `route.match(verbs, uri, action)`
-For each of the verbs specified, routes a request for a `uri` to an `action`.
-
-#### `route.any(uri, action)`
-Routes a request for a `uri` to an `action` for any verb.
-
-#### `route.group(group_options, closure)`
-Creates a grouping of routes.
-
-More details [here](#route-groups).
-
-
-
-## Advanced Usage
-
-
-## Usage
-
-
-
-
-
-
-
-
-## API
-
-ScenicRoute follows inspiration.js's Route contract.  Below is a summary of the available methods.
-
-#### get(uri, action)
-
-Route's a GET request for a uri to an action.
-```
-route.get('/hello-world', function(req, res) {
-    
-    res.end('Hello, world');
-});
-```
-#### post(uri, action)
-
-Route's a POST request for a uri to an action.
-```
-route.post('/hello-world', function(req, res) {
-    
-    res.end('Hello, world');
-});
-```
-
-
-
-
-## Advanced usage
-
-### The factory function
-
-The full factory function with all its (optional) arguments are as follows:
-```
-var ScenicRoute = require('scenic-route')(config, errorHandler, DB);
-```
-
-`config` is an object that can be used to override the defaults used. Any and all properties supplied are optional.
-Under the hood, _.defaultsDeep is used. Here's the full possible structure:
-```
-{
-    messages: {
-        [rule]: 'The message for this rule.'
-    },
-    rules: {
-        [rule]: function(data, field, value, parameters, callback) {}
-    },
-    replacers: {
-        [rule]: function(field, constraint) {}
-    }
-}
-```
-
-`errorHandler` is a function that can be used to override the default handling of errors. Whatever is returned from this
-function will be passed as the error in a failed validation. The signature is as follows:
-```
-function(errors) {}
-```
-
-`DB` is a class adhering to inspirationjs's "DB" contract.  [babylon-db](https://github.com/musejs/babylon-db) fits right in.
-Supplying this allows use of the "exists" and "unique" rules.
-
-
-### Adding new rules
-
-You may either add new rules or override existing rule implementations by supplying it in the factory's `config` object,
-or if you already have a `ScenicRoute` class, you may call the `rule` method:
-```
-var ScenicRoute = require('scenic-route')();
-
-ScenicRoute.rule('equals_something', function(data, field, value, parameters, callback) {
-
-    callback(null, value === 'something');
-});
-
-var data = {
-    field_1: 'something'
-};
-var rules = {
-    field_1: 'equals_something'
-};
-
-var validator = ScenicRoute.make(data, rules);
-
-validator.validate(function(err) {
-    // this will pass.
-});
-
-```
-
-### Conditional rules
-
-Conditional rules can be applied in one of two ways. The first way works for rules you wish to add only if a field
-is present in the data. You do this by adding the "sometimes" rule before any others.
-
-##### Example 1:
-```
-var data = {
-    meal_selection: 'meat'
-};
-
-var rules = {
-    meal_selection: ['required', 'in:vegetables,meat'],
-    type_of_meat: ['sometimes', 'required', 'in:beef,chicken,pork']
-};
-
-var validator = ScenicRoute.make(data, rules);
-
-validator.validate(function(err) {
-    // this will pass, because "type_of_meat" is not present in the data.
-});
-```
-##### Example 2:
-```
-var data = {
-    meal_selection: 'meat',
-    type_of_meat: 'turkey'
-};
-
-var rules = {
-    meal_selection: 'required|in:vegetables,meat',
-    type_of_meat: ['sometimes', 'required', 'in:beef,chicken,pork']
-};
-
-var validator = ScenicRoute.make(data, rules);
-
-validator.validate(function(err) {
-    /**
-     * this will fail,
-     * because the "type_of_meat" field was present in the data,
-     * so its conditional rules kicked in.
-     */
-});
-```
-
-For cases that require more complex conditions, you may use the `sometimes` method of the validator instance.
-
-It's signature is:
-```
-validator.sometimes(field, rules, condition);
-```
-- `field` is the name of the field to apply the rules.
-- `rules` are the rules to apply.
-- `condition` is a function that should return a boolean to indicate if to apply the `rules` or not. It is supplied with the `data` object as an argument.
-
-##### Example 1:
-```
-var data = {
-    meal_selection: 'meat'
-};
-
-var rules = {
-    meal_selection: ['required', 'in:vegetables,meat']
-};
-
-var validator = ScenicRoute.make(data, rules);
-
-/**
- * This will require a "type_of_meat" field in the data,
- * if the "meal_selection" field equals "meat".
- */
-validator.sometimes('type_of_meat', ['required', 'in:beef,chicken,pork'], function(data) {
-
-    return data.meal_selection == 'meat';
-});
-
-validator.validate(function(err) {
-    /**
-     * this will fail,
-     * because "meal_selection" was "meat",
-     * causing the conditional rules for "type_of_meat" to kick in.
-     */
-});
-```
-
-### Message placeholders
-
-Every message supplied (either in the factory's `config` object or in the `messages` object in `ScenicRoute.make(data, rules, messages)`)
-can include placeholders. Placeholders are identified by a colon (":") before it. The most commonly found placeholder in
-the default messages is ":attribute", which maps to the name of the field under validation.
-
-Whenever an error message needs to be generated for a rule, it is first passed through functions called "replacers".
-These functions are keyed by the rule they run on. Additionally, there is a default replacer called before the rule-specific
-replacers are called.
-
-You may add or overwrite the default replacers with your own functions by either supplying them in the factory's `config` object,
-or if you already have a `ScenicRoute` class, you may call the `replacer` method:
-```
-var ScenicRoute = require('../src/factory')();
-
-ScenicRoute.replacer('required', function(field, constraint) {
-
-    constraint.message = constraint.message.replace(new RegExp(':attribute'), 'XXX');
-});
-
-var data = {};
-
-var rules = {
-    field_1: 'required'
-};
-
-var validator = ScenicRoute.make(data, rules);
-
-validator.validate(function(err) {
-
-});
-```
-The above example will replace the ":attribute" placeholder with the string "field", e.g. "The XXX is required.".  The original `required` replacer
-replaced ":attribute" with the field name with spaces instead of non-alphanumeric characters, e.g. "The field 1 is required.".
-
-To overwrite the default replacer, you must first get the default replacer's key, which is actually a Symbol object (to prevent key collisions).
-You may do so by first calling `ScenicRoute.defaultReplacerKey()`.
-```
-var default_replacer_key = ScenicRoute.defaultReplacerKey();
-ScenicRoute.replacer(default_replacer_key, function(field, constraint) {
-    // do your replacing
-});
-
-```
 ## Benchmarks
 
-Benchmarks are done using Apache Benchmark, with the tests found in `/test/performance`
+Benchmarks are done using Apache Benchmark, with the tests found in `/performance-test`
 
 `ab -t 10 -c 10 http://localhost:1337/hello-world`
 

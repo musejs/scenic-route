@@ -553,11 +553,6 @@ module.exports = function(config, controllerHandler) {
             config.error_middleware.push(config.middlewareHandler(errorMiddleware));
         }
 
-        static get errorMiddleware() {
-
-            return config.error_middleware;
-        }
-
         /**
          * Sets a new action handler.
          *

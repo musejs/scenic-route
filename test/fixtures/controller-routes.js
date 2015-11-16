@@ -29,13 +29,11 @@ function controllerHandler(controller_name, options, controller_options) {
 
     _.forEach(methods, function(method) {
 
-        actions[method] = function(req, res) {
-
-            return controller[method](req, res);
-        };
+        actions[method] = controller[method];
     });
 
     return actions;
+
 }
 
 function actionHandler(action, options) {
