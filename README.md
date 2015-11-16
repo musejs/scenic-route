@@ -177,7 +177,9 @@ route.get('/user/{identifier}', {
     }
 });
 ```
-You may also specify "global" constraints, which will take effect every time that param is found.
+
+You may also specify "global" constraints, which will take effect every time that param is found.  
+This is accomplished with `ScenicRoute.pattern(param, pattern)`.
 ```
 ScenicRoute.pattern('user_id', /^\d+$/);
 
