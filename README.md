@@ -246,6 +246,7 @@ Unlike "regular" middleware, however, to get to the next error middleware, you m
 If you call `next()` without an error, the rest of the error middleware stack will not be called, 
 and the default final handler will be called (which you probably won't want).
 
+All three of the following routes will result in errors that will be handled:
 ```
 ScenicRoute.addErrorMiddleware(function(err, req, res, next) {
 
