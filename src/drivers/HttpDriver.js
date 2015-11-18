@@ -298,6 +298,11 @@ module.exports = class HttpDriver {
 
             var next = function(err) {
 
+                if (!err) {
+                    var done = finalhandler(req, res);
+                    return done();
+                }
+
                 var fn = error_middleware[index++];
 
                 if (fn) {
@@ -313,8 +318,7 @@ module.exports = class HttpDriver {
                         next(err);
                     }
                 } else {
-                    var done = finalhandler(req, res);
-                    done(err);
+                   next();
                 }
             };
 

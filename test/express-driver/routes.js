@@ -1049,6 +1049,20 @@ describe('ExpressDriver', function() {
                 });
         });
 
+        it('should route to a file in route 51 with error', function(done) {
+
+            request(app)
+                .get('/route-51')
+                .expect(500)
+                .end(function(err, res){
+
+                    if (err) {
+                        throw err;
+                    }
+                    res.text.should.equal('route 51 error');
+                    done();
+                });
+        });
 
     });
 

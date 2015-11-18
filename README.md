@@ -135,7 +135,7 @@ route.get('/hello/{name}', {
         res.end('Hello, '+ req.params.name);
     },
     where: {
-        hello: /^[A-Za-z]+$/
+        name: /^[A-Za-z]+$/
     }
 });
 ```
@@ -231,6 +231,60 @@ route.get('/foo', {
     }
 });
 ```
+
+#### Error-handling Middleware
+
+Like Express.js, error-handling middleware are of the signature `function(err, req, res, next) {}`. You may define error middleware
+using `ScenicRoute.addErrorMiddleware(middleware)`.  The middleware will get added to a stack that gets called 
+whenever an error is detected in your middleware or action functions (either supplied to `next()`, or thrown at the top-level).
+
+You may add multiple error middleware by either supplying `ScenicRoute.addErrorMiddleware` with an array of middleware, 
+or by multiple calls to `ScenicRoute.addErrorMiddleware`.  Like "regular" middleware, the error middleware will execute in order.
+
+Unlike "regular" middleware, however, to get to the next error middleware, you must continuously supply an error to `next()`.
+
+If you call `next()` without an error, the rest of the error middleware stack will not be called, 
+and the default final handler will be called (which you probably won't want).
+
+```
+ScenicRoute.addErrorMiddleware(function(err, req, res, next) {
+
+    console.log(err);
+    next(err); // if we didn't supply err to next, it would've skipped the next error middleware.
+});
+
+ScenicRoute.addErrorMiddleware(function(err, req, res, next) {
+
+    res.statusCode = err.status || 500;
+    res.end(err.message || 'An internal error occurred.');
+});
+
+
+route.get('/error-prone-action', function(req, res) {
+
+    throw new Error('Oops!');
+});
+
+route.get('/another-error-prone-action', function(req, res, next) {
+
+    next(new Error('Oops!'));
+});
+
+route.get('/error-prone-middleware', {
+    middleware: function(req, res, next) {
+                
+        next(new Error('Oops!'));
+    },
+    uses: function(req, res) {
+        
+        res.end('This will never happen.');
+    }
+});
+```
+Note: in the above example, the "/another-error-prone-action" action uses "next", even though it is an action. This is allowed,
+though calling "next()" without an error in an action will end up calling the default final handler, which you probably don't want.
+
+Also, notice that unlike Express, you can define error middleware at any point--you don't have to save it for last.
 
 ### Named Routes
 
@@ -579,10 +633,6 @@ This error will be called by `next(err)`, and as such will kick off the chain of
 `next` do.
 
 `Driver` is any class/object that adheres to the ScenicRouteDriver contract.  HttpDriver and ExpressDriver both ship with scenic-route.
-
-### Error-handling Middleware
-
-
 
 ### Controller Support
 

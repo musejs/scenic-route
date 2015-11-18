@@ -550,7 +550,14 @@ module.exports = function(config, controllerHandler) {
          */
         static addErrorMiddleware(errorMiddleware) {
 
-            config.error_middleware.push(config.middlewareHandler(errorMiddleware));
+            if (!_.isArray(errorMiddleware)) {
+                errorMiddleware = [errorMiddleware];
+            }
+
+            _.forEach(errorMiddleware, function(m) {
+
+                config.error_middleware.push(config.middlewareHandler(m));
+            });
         }
 
         /**

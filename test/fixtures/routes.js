@@ -357,6 +357,23 @@ module.exports = function(ScenicRoute) {
     route.serve('route-48/route-49', path.join(public_dir, 'public-2'));
     route.serve('route-50', path.join(public_dir, 'public-2'));
 
+    ScenicRoute.addErrorMiddleware(function(err, req, res, next) {
+
+        next(err);
+    });
+
+    ScenicRoute.addErrorMiddleware(function(err, req, res, next) {
+
+        res.statusCode = err.status || 500;
+        res.end(err.message || 'error');
+    });
+
+
+    route.get('route-51', function(req, res) {
+
+        throw new Error('route 51 error');
+    });
+
 
     return route;
 };
