@@ -4,11 +4,8 @@ This package is part of the [musejs](https://github.com/musejs) suite of compone
 
 This router borrows heavily from Laravel's [router](http://laravel.com/docs/5.1/routing), in that it implements a very similar API.  
 
-This is not, however, a direct port.  Besides the obvious difference that one is
-in PHP and the other is in node.js, scenic-route's implementation logic is its own, and adheres to the conventions found
-in other musejs components.
-
-One musejs convention found here is the concept of drivers.  Scenic-route ships with two: HttpDriver and ExpressDriver.
+As in other musejs components, this router employs the concept of "drivers" to promote flexibility.  In this case, drivers
+control how actions are routed to, given a URL.  Scenic-route ships with two: HttpDriver and ExpressDriver.
 HttpDriver is the default, and it is *fast*.  Its tree-based structure is approximately 15% faster than Express.js,
 while accommodating for almost every use-case of Express.
 
