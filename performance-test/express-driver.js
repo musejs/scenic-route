@@ -17,7 +17,7 @@ route.get('/hello-world', function(req, res) {
     res.end('hello, world!');
 });
 
-ScenicRoute.startServer(1337, function(err, server) {
+ScenicRoute.startServer(1337, function(server) {
 
     console.log('listening on port '+1337);
 });

@@ -21,7 +21,7 @@ describe('ExpressDriver', function() {
             var route = routes(ScenicRoute);
 
             //console.log(JSON.stringify(ScenicRoute.tree));
-            ScenicRoute.startServer(1338, function(err, server) {
+            ScenicRoute.startServer(1338, function(server) {
 
                 app = server;
                 done();

@@ -17,7 +17,7 @@ describe('HttpDriver', function() {
 
             var route = routes(ScenicRoute);
 
-            ScenicRoute.startServer(1337, function(err, server) {
+            ScenicRoute.startServer(1337, function(server) {
 
                 app = server;
                 done();

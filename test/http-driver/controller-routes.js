@@ -14,7 +14,7 @@ describe('controller routes', function() {
         var route = routes(ScenicRoute);
 
         //console.log(JSON.stringify(ScenicRoute.tree));
-        ScenicRoute.startServer(3000, function(err, server) {
+        ScenicRoute.startServer(3000, function(server) {
 
             app = server;
             done();

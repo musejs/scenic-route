@@ -38,7 +38,7 @@ module.exports = class ExpressDriver {
 
         var server = this.constructor.express_app.listen(port, function () {
             if (callback) {
-                callback(null, server);
+                callback(server);
             }
         });
 

@@ -45,7 +45,7 @@ route.post('/greeting/{name}', function(req, res) {
 
 route.serve('public/uploads', '/uploads');
 
-ScenicRoute.listen(1337, function(err, server) {
+ScenicRoute.listen(1337, function(server) {
 
 });
 ```
@@ -569,14 +569,14 @@ constrained by the supplied regex pattern.
 More details [here](#regex-constraints).
 
 #### `ScenicRoute.startServer(port, callback)`
-Starts the server at the specified port.  The `callback` has the signature `function(err, server) {}`.
+Starts the server at the specified port.  The `callback` has the signature `function(server) {}`.
 
 #### `ScenicRoute.url(name, params)`
 Generates a url to a named route.
 
 More details [here](#named-routes).
 
-### `ScenicRoute.addErrorMiddleware(errorMiddleware)`
+#### `ScenicRoute.addErrorMiddleware(errorMiddleware)`
 Adds middleware to a stack that will be called whenever an error occurs in an action or in its middleware.
 
 This middleware is of the signature `function(err, req, res, next) {}`.
@@ -840,13 +840,13 @@ Benchmarks are done using Apache Benchmark, with the tests found in `/performanc
 ##### HttpDriver: 
 Metric  | Result
 ------------- | -------------
-Requests per second  | 3121.80 [#/sec] (mean)
-Time per request  | 3.203 [ms] (mean)
-Time per request  | 0.320 [ms] (mean, across all concurrent requests)
+Requests per second  | 3121.80 #/sec (mean)
+Time per request  | 3.203 ms (mean)
+Time per request  | 0.320 ms (mean, across all concurrent requests)
 
 ##### ExpressDriver: 
 Metric  | Result
 ------------- | -------------
-Requests per second  | 2657.44 [#/sec] (mean)
-Time per request  | 3.763 [ms] (mean)
-Time per request  | 0.376 [ms] (mean, across all concurrent requests)
+Requests per second  | 2657.44 #/sec (mean)
+Time per request  | 3.763 ms (mean)
+Time per request  | 0.376 ms (mean, across all concurrent requests)
