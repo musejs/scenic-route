@@ -8,7 +8,7 @@ var send = require('send');
 var variable_param_key = Symbol('variable_param');
 var variable_regex_param_key = Symbol('variable_regex_param');
 
-module.exports = function(config, controllerHandler) {
+module.exports = function(config) {
 
     var actionHandler = require('./actionHandler');
     var middlewareHandler = require('./middlewareHandler');
@@ -220,9 +220,10 @@ module.exports = function(config, controllerHandler) {
          * @param controller_name
          * @param controller_options
          */
+
         controller(uri, controller_name, controller_options) {
 
-            if (!controllerHandler) {
+            if (!config.controllerHandler) {
 
                 throw new Error('No controller handler given.');
             }
@@ -231,7 +232,7 @@ module.exports = function(config, controllerHandler) {
                 controller_options = {};
             }
 
-            var actions = controllerHandler(controller_name, this._options, controller_options);
+            var actions = config.controllerHandler(controller_name, this._options, controller_options);
             var route = this;
 
             _.forEach(Object.keys(actions), function(action) {
@@ -600,9 +601,9 @@ module.exports = function(config, controllerHandler) {
             config.Driver = Driver;
         }
 
-        static controllerHandler(newControllerHandler) {
+        static controllerHandler(controllerHandler) {
 
-            controllerHandler = newControllerHandler;
+            config.controllerHandler = controllerHandler;
         }
 
         /**

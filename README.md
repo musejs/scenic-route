@@ -48,8 +48,7 @@ ScenicRoute.listen(1337, function(server) {
 
 ### Details
 
-`require('scenic-route')` yields a factory function, with the following arguments: `config`, and `controllerHandler`.
-All arguments are optional.
+`require('scenic-route')` yields a factory function, with an optional`config` argument.
 
 Once the factory function is called, it will return a `ScenicRoute` class, which you may then use to create a new
 route instance with which to define routes.  This can be done by calling either `new ScenicRoute(options)`
@@ -555,7 +554,7 @@ Creates routes based on the controller.
 
 More details [here](#advanced-controller-support).
 
-#### `ScenicRoute.make(config, controllerHandler)`
+#### `ScenicRoute.make(config)`
 Creates a new route instance.
 
 #### `ScenicRoute.pattern(param, pattern)`
@@ -594,7 +593,7 @@ Sets a new `notFoundHandler` function.
 Sets a new driver.
 
 #### `ScenicRoute.controllerHandler(closure)`
-Sets a new `controllerHandler` function.
+Sets a `controllerHandler` function.
 
 More details [here](#advanced-controller-support).
 
@@ -605,7 +604,7 @@ More details [here](#advanced-controller-support).
 
 The full factory function with all its (optional) arguments are as follows:
 ```
-var ScenicRoute = require('scenic-route')(config, controllerHandler);
+var ScenicRoute = require('scenic-route')(config);
 ```
 
 `config` is an object that can be used to override the defaults used. Any and all properties supplied are optional.
@@ -615,6 +614,7 @@ Under the hood, [_.defaultsDeep](https://lodash.com/docs#defaultsDeep) is used. 
     actionHandler: function(action, options) {},
     middlewareHandler: function(middleware) {},
     notFoundHandler: function(uri) {},
+    controllerHandler: function(controller_name, options, controller_options) {},
     Driver: Driver
 }
 ```
@@ -628,6 +628,8 @@ or any other manipulation to the action object.
 `notFoundHandler` is called whenever a requested route is not found.  It should return an object that will act as the error.
 This error will be called by `next(err)`, and as such will kick off the chain of error-handling middleware, as all errors that are passed to 
 `next` do.
+
+`controllerHandler` is used to enable the `route.controller` function.  More details [here](#enabling-routecontroller).
 
 `Driver` is any class/object that adheres to the ScenicRouteDriver contract.  HttpDriver and ExpressDriver both ship with scenic-route.
 
@@ -796,7 +798,7 @@ In order to enable `route.controller` support, you must supply a `controllerHand
 which is a function that is provided with a controller's name, and must then generate a plain javascript object, 
 whose keys are the method names of the controller, and values are the action function.
 
-A `controllerHandler` can be supplied either as the second argument in the scenic-route factory function, or if you already have
+A `controllerHandler` can be supplied in the `config` argument in the scenic-route factory function, or if you already have
 a `ScenicRoute` class, by supplying it to `ScenicRoute.controllerHandler(closure)`.
 ```
 function controllerHandler(controller_name, options, controller_options) {
