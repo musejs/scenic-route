@@ -1,6 +1,6 @@
 {
   "name": "scenic-route",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A powerful, performant, and extensible router built for inspirationjs.",
   "main": "./src/factory.js",
   "scripts": {

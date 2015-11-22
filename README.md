@@ -6,7 +6,7 @@ This router was inspired heavily by Laravel's [router](http://laravel.com/docs/5
 
 As in other musejs components, this router employs the concept of "drivers" to promote flexibility.  In this case, drivers
 control how actions are routed to, given a URL.  Scenic-route ships with two: HttpDriver and ExpressDriver.
-HttpDriver is the default, and it its tree-based structure is slightly faster than Express.js.
+HttpDriver is the default, and its tree-based structure is slightly faster than Express.js.
 
 However, if you find yourself limited to using Express-only middleware, the provided ExpressDriver will use Express.js
 under the hood for routing instead.
