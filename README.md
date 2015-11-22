@@ -2,12 +2,11 @@
 
 This package is part of the [musejs](https://github.com/musejs) suite of components.
 
-This router borrows heavily from Laravel's [router](http://laravel.com/docs/5.1/routing), in that it implements a very similar API.  
+This router was inspired heavily by Laravel's [router](http://laravel.com/docs/5.1/routing), in that it implements a very similar API.  
 
 As in other musejs components, this router employs the concept of "drivers" to promote flexibility.  In this case, drivers
 control how actions are routed to, given a URL.  Scenic-route ships with two: HttpDriver and ExpressDriver.
-HttpDriver is the default, and it is *fast*.  Its tree-based structure is approximately 15% faster than Express.js,
-while accommodating for almost every use-case of Express.
+HttpDriver is the default, and it its tree-based structure is slightly faster than Express.js.
 
 However, if you find yourself limited to using Express-only middleware, the provided ExpressDriver will use Express.js
 under the hood for routing instead.
@@ -830,20 +829,20 @@ of the controller, and finally, for each of those methods, it maps to an action 
 
 ## Benchmarks
 
-Benchmarks are done using Apache Benchmark, with the tests found in `/performance-test`
+Benchmarks are done using Apache Benchmark, with the tests found in `performance.js`
 
-`ab -t 10 -c 10 http://localhost:1337/hello-world`
+`ab -t 10 -c 10 http://localhost:1337/hello/world`
 
-##### HttpDriver: 
+##### ScenicRoute + HttpDriver: 
 Metric  | Result
 ------------- | -------------
-Requests per second  | 3121.80 #/sec (mean)
-Time per request  | 3.203 ms (mean)
-Time per request  | 0.320 ms (mean, across all concurrent requests)
+Requests per second  | 2912.77 #/sec (mean)
+Time per request  | 3.433 ms (mean)
+Time per request  | 0.343 ms (mean, across all concurrent requests)
 
-##### ExpressDriver: 
+##### Express.js: 
 Metric  | Result
 ------------- | -------------
-Requests per second  | 2657.44 #/sec (mean)
-Time per request  | 3.763 ms (mean)
-Time per request  | 0.376 ms (mean, across all concurrent requests)
+Requests per second  | 2714.60 #/sec (mean)
+Time per request  | 3.684 ms (mean)
+Time per request  | 0.368 ms (mean, across all concurrent requests)
