@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var path = require('path');
+var http = require('http');
 var should = require('should');
 var request = require('supertest');
 
@@ -13,15 +14,10 @@ describe('HttpDriver', function() {
         var routes = require('../fixtures/routes');
         var ScenicRoute = require('../../src/factory')();
 
-        before(function(done) {
+        before(function() {
 
             var route = routes(ScenicRoute);
-
-            ScenicRoute.startServer(1337, function(server) {
-
-                app = server;
-                done();
-            });
+            app = http.createServer(ScenicRoute.requestHandler());
         });
 
         it('should route to the root with ok', function(done) {

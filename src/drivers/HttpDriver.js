@@ -18,19 +18,17 @@ module.exports = class HttpDriver {
     }
 
     /**
-     * Starts the server on the specified port.
+     * Gets the function to be passed to http.createServer.
      *
-     * @param port
-     * @param callback
      */
-    listen(port, callback) {
+    requestHandler() {
 
         var error_middleware = this.ScenicRoute.factoryConfig().error_middleware;
         var that = this;
 
         var errorHandler = this.constructor.errorHandlerFactory(error_middleware);
 
-        var server = http.createServer(function(req, res) {
+        return function(req, res) {
 
             var verb = req.method;
             var parsed = url.parse(req.url, false, true);
@@ -40,13 +38,6 @@ module.exports = class HttpDriver {
 
             _.assign(req, parsed);
 
-            /**
-             * For express.js compatibility.
-             */
-            res.send = function() {
-
-                res.end.apply(res, arguments);
-            };
 
             if (!action) {
 
@@ -107,17 +98,7 @@ module.exports = class HttpDriver {
             };
 
             next();
-
-
-        });
-
-        server.listen(port, function(){
-
-            if (callback) {
-                callback(server);
-            }
-        });
-
+        };
     }
 
     /**

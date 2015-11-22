@@ -25,6 +25,7 @@ Note: requires node.js 4.0 or higher.
 ### Quickstart
 
 ```
+var http = require('http');
 var ScenicRoute = require('scenic-route')();
 
 var route = ScenicRoute.make();
@@ -41,8 +42,8 @@ route.post('/greeting/{name}', function(req, res) {
 
 route.serve('public/uploads', '/uploads');
 
-ScenicRoute.listen(1337, function(server) {
-
+http.createServer(ScenicRoute.requestHandler()).listen(1337, function() {
+    console.log('Listening!');
 });
 ```
 
@@ -70,7 +71,7 @@ or a plain javascript object with the following keys:
 - `name` - an optional string that names this route, which can then be used to generate URLs to this route, using the static method `SceniceRoute.url(name)`
 - `where` - an optional plain javascript object whose keys are route params, and values are a regex (RegExp object, regex literal, or a regex string) to constrain the param to
     
-When all routes have been defined, the static method `ScenicRoute.listen` can then be called to start the server at the specified port.
+When all routes have been defined, the static method `ScenicRoute.requestHandler` will return a function to send to `http.createServer` (or `https.createServer`).
 
 ### Basic Routes
 
@@ -563,8 +564,8 @@ constrained by the supplied regex pattern.
 
 More details [here](#regex-constraints).
 
-#### `ScenicRoute.startServer(port, callback)`
-Starts the server at the specified port.  The `callback` has the signature `function(server) {}`.
+#### `ScenicRoute.requestHandler()`
+Returns a function accepted by `http.createServer`, `https.createServer`, etc.
 
 #### `ScenicRoute.url(name, params)`
 Generates a url to a named route.

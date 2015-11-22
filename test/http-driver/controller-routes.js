@@ -1,5 +1,6 @@
 "use strict";
 
+var http = require('http');
 var should = require('should');
 var request = require('supertest');
 
@@ -9,16 +10,10 @@ describe('controller routes', function() {
     var routes = require('../fixtures/controller-routes');
     var ScenicRoute = require('../../src/factory')();
 
-    before(function(done) {
+    before(function() {
 
         var route = routes(ScenicRoute);
-
-        //console.log(JSON.stringify(ScenicRoute.tree));
-        ScenicRoute.startServer(3000, function(server) {
-
-            app = server;
-            done();
-        });
+        app = http.createServer(ScenicRoute.requestHandler());
     });
 
     it('should route to controller route 1', function(done) {

@@ -14,34 +14,12 @@ module.exports = class ExpressDriver {
     }
 
     /**
-     * Starts the server on the specified port.
+     * Gets the function to be passed to http.createServer.
      *
-     * @param port
-     * @param callback
      */
-    listen(port, callback) {
+    requestHandler() {
 
-        var error_middleware = this.ScenicRoute.factoryConfig().error_middleware;
-        var that = this;
-
-        this.constructor.express_app.use(function(req, res, next) {
-
-            var err = that.ScenicRoute.factoryConfig().notFoundHandler(req.path);
-
-            next(err);
-        });
-
-        _.forEach(error_middleware, function(fn) {
-
-            that.constructor.express_app.use(fn);
-        });
-
-        var server = this.constructor.express_app.listen(port, function () {
-            if (callback) {
-                callback(server);
-            }
-        });
-
+        return this.constructor.express_app;
     }
 
     parseRoutes() {
@@ -77,6 +55,20 @@ module.exports = class ExpressDriver {
         _.forEach(sorted_public_routes, function(route) {
 
             that.constructor.express_app.get(path.join(route, '*'), public_routes[route]);
+        });
+
+        this.constructor.express_app.use(function(req, res, next) {
+
+            var err = that.ScenicRoute.factoryConfig().notFoundHandler(req.path);
+
+            next(err);
+        });
+
+        var error_middleware = this.ScenicRoute.factoryConfig().error_middleware;
+
+        _.forEach(error_middleware, function(fn) {
+
+            that.constructor.express_app.use(fn);
         });
     }
 

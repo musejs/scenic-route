@@ -478,17 +478,15 @@ module.exports = function(config) {
         }
 
         /**
-         * Starts the server.
+         * Gets the function to be passed to http.createServer.
          *
-         * @param port
-         * @param callback
          */
-        static startServer(port, callback) {
+        static requestHandler() {
 
             var driver = config.Driver.make(this);
 
             driver.parseRoutes();
-            driver.listen(port, callback);
+            return driver.requestHandler();
         }
 
         /**
