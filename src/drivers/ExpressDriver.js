@@ -9,8 +9,12 @@ module.exports = class ExpressDriver {
     constructor(ScenicRoute) {
 
         this.ScenicRoute = ScenicRoute;
-        this.constructor.express = express;
-        this.constructor.express_app = express();
+        if (!this.constructor.express) {
+            this.constructor.express = express;
+        }
+        if (!this.constructor.express_app) {
+            this.constructor.express_app = express();
+        }
     }
 
     /**
