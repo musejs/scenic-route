@@ -5,14 +5,16 @@ var path = require('path');
 var http = require('http');
 var should = require('should');
 var request = require('supertest');
+var express = require('express');
 
 describe('ExpressDriver', function() {
 
     describe('basic routes', function() {
 
-        var app;
+        var app = express();
         var routes = require('../fixtures/routes');
         var ExpressDriver = require('../../src/drivers/ExpressDriver');
+        ExpressDriver.express(app);
         var ScenicRoute = require('../../src/factory')({
             Driver: ExpressDriver
         });

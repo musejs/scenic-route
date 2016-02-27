@@ -2,19 +2,12 @@
 
 var _ = require('lodash');
 var path = require('path');
-var express = require('express');
 
 module.exports = class ExpressDriver {
 
     constructor(ScenicRoute) {
 
         this.ScenicRoute = ScenicRoute;
-        if (!this.constructor.express) {
-            this.constructor.express = express;
-        }
-        if (!this.constructor.express_app) {
-            this.constructor.express_app = express();
-        }
     }
 
     /**
@@ -146,5 +139,12 @@ module.exports = class ExpressDriver {
 
         return new this(ScenicRoute);
     }
+
+    static express(app) {
+
+        this.express_app = app;
+    }
+
+
 };
 
