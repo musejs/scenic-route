@@ -618,6 +618,9 @@ This middleware is of the signature `function(err, req, res, next) {}`.
 
 More details [here](#error-handling-middleware).
 
+#### `ScenicRoute.factoryConfig()`
+Returns the config options passed to the factory function as they currently stand.
+
 #### `ScenicRoute.actionHandler(closure)`
 Sets a new `actionHandler` function.
 
