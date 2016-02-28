@@ -73,6 +73,45 @@ or a plain javascript object with the following keys:
     
 When all routes have been defined, the static method `ScenicRoute.requestHandler` will return a function to send to `http.createServer` (or `https.createServer`).
 
+### Express.js Usage
+This router can be used seamlessly with express.js, via the ExpressDriver.
+
+```
+var http = require('http');
+var ScenicRoute = require('scenic-route')();
+var ExpressDriver = require('scenic-route/src/drivers/ExpressDriver');
+var express = require('express');
+
+var app = express();
+ExpressDriver.express(app); // set the express instance
+
+ScenicRoute.driver(ExpressDriver); // set the new driver
+
+var route = ScenicRoute.make();
+
+route.get('/hello-world', function(req, res) {
+    
+    res.send('Hello, world');
+});
+
+route.post('/greeting/{name}', function(req, res) {
+    
+    res.send('Hello, ' + req.params.name);
+});
+
+route.serve('public/uploads', '/uploads');
+
+http.createServer(ScenicRoute.requestHandler()).listen(1337, function() {
+    console.log('Listening!');
+});
+/*
+ * Alternatively, because ScenicRoute.requestHandler() returns the express app,
+ * you can call ScenicRoute.requestHandler().listen(1337, function() {});
+ * to start the server.
+ */
+
+```
+
 ### Basic Routes
 
 The simplest form of routing accepts a Connect-style function as the action.

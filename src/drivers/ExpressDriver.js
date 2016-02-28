@@ -36,7 +36,6 @@ module.exports = class ExpressDriver {
             var route = route.replace(pieces[0], '');
 
             if (verb !== 'public') {
-
                 that.constructor.express_app[verb](route, stack);
             } else {
                 public_routes[route] = stack;
