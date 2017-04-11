@@ -899,7 +899,7 @@ module.exports = function(requestHandler) {
     it('should route to [delete] route 45 with ok', function(done) {
 
         request(requestHandler)
-            .delete('/route-45')
+            .del('/route-45')
             .expect(200)
             .end(function(err, res){
 

@@ -654,7 +654,7 @@ var ScenicRoute = require('scenic-route')(config);
 Under the hood, [_.defaultsDeep](https://lodash.com/docs#defaultsDeep) is used. Here's the full possible structure:
 ```
 {
-    actionHandler: function(action, options) {},
+    actionHandler: function(action, options, uri) {},
     middlewareHandler: function(middleware) {},
     notFoundHandler: function(uri) {},
     controllerHandler: function(controller_name, options, controller_options) {},
@@ -707,7 +707,7 @@ class IndexController {
 ```
 To support this setup, you could change `actionHandler` like so:
 ```
-function actionHandler(action, options) {
+function actionHandler(action, options, uri) {
 
     if (_.isString(action.uses)) {
 
