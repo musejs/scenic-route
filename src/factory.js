@@ -124,7 +124,7 @@ module.exports = function(config) {
                 root: public_dir,
                 directoryHandler: function(req, res, next) {
 
-                    next(notFoundHandler(uri));
+                    next(config.notFoundHandler(uri));
                 }
             });
 
