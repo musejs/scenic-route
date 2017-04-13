@@ -70,6 +70,7 @@ or a plain javascript object with the following keys:
 - `middleware` - an optional array or single function of Connect-style middleware to run before the action
 - `name` - an optional string that names this route, which can then be used to generate URLs to this route, using the static method `SceniceRoute.url(name)`
 - `where` - an optional plain javascript object whose keys are route params, and values are a regex (RegExp object, regex literal, or a regex string) to constrain the param to
+- `verb` - the associated HTTP verb for this action
     
 When all routes have been defined, the static method `ScenicRoute.requestHandler` will return a function to send to `http.createServer` (or `https.createServer`).
 

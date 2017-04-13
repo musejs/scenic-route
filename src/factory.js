@@ -300,7 +300,7 @@ module.exports = function(config) {
             }
 
             var pieces = this.constructor.parseUri(path.join(this._options.prefix, uri));
-            var action_description = this.normalizeAction(action, uri);
+            var action_description = this.normalizeAction(action, uri, verb);
 
             this.createBranch(verb, pieces, action_description);
         }
@@ -405,9 +405,10 @@ module.exports = function(config) {
          *
          * @param action
          * @param uri
+         * @param verb
          * @returns {{middleware: Array, closure: *, name: *, where: {}}}
          */
-        normalizeAction(action, uri) {
+        normalizeAction(action, uri, verb) {
 
             var middleware = [];
             var name = null;
@@ -448,7 +449,8 @@ module.exports = function(config) {
                 middleware: middleware,
                 uses: action,
                 name: name,
-                where: where
+                where: where,
+                verb: verb
             }, this._options, uri);
         }
 
