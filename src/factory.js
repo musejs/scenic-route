@@ -148,7 +148,7 @@ module.exports = function(config) {
                 stream.on('error', function(err) {
 
                     if (err && err.statusCode == 404) {
-                        err = notFoundHandler(uri);
+                        err = config.notFoundHandler(uri);
                     }
                     next(err);
                 });
