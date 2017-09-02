@@ -436,7 +436,7 @@ route.group({name: 'foo-'}, function(route) {
             var url = ScenicRoute.url('foo-baz'); // this equals "/baz"
             ...
         },
-        name: 'baz
+        name: 'baz'
     });
 });
 ```
@@ -464,7 +464,7 @@ route.group({prefix: '/foo', middleware: m, name: 'foo-'}, function(route) {
             var url = ScenicRoute.url('foo-baz'); // this equals "/foo/baz"
             ...
         },
-        name: 'baz
+        name: 'baz'
     });
 
 });
@@ -495,7 +495,7 @@ route.group({prefix: '/foo', middleware: m, name: 'foo-'}, function(route) {
                 var url = ScenicRoute.url('foo-bad-baz'); // this equals "/foo/bad/baz"
                 ...
             },
-            name: 'baz
+            name: 'baz'
         }); 
            
         /*
