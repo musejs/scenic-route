@@ -20,7 +20,7 @@ Note: requires node.js 4.0 or higher.
 
 ### Quickstart
 
-```
+```js
 var http = require('http');
 var ScenicRoute = require('scenic-route')();
 
@@ -73,7 +73,7 @@ When all routes have been defined, the static method `ScenicRoute.requestHandler
 ### Express.js Usage
 This router can be used seamlessly with express.js, via the ExpressDriver.
 
-```
+```js
 var http = require('http');
 var ScenicRoute = require('scenic-route')();
 var ExpressDriver = require('scenic-route/src/drivers/ExpressDriver');
@@ -113,14 +113,14 @@ http.createServer(ScenicRoute.requestHandler()).listen(1337, function() {
 
 The simplest form of routing accepts a Connect-style function as the action.
 
-```
+```js
 route.get('/hello-world', function(req, res) {
     
     res.end('Hello, world');
 });
 ```
 Note: the following is equivalent to the above example.
-```
+```js
 route.get('/hello-world', {
     uses: function(req, res) {
               
@@ -130,7 +130,7 @@ route.get('/hello-world', {
 
 ```
 The route instance has methods for each HTTP verb (`get`, `post`, `put`, `delete`, `patch`, `options`).
-```
+```js
 /*
  * This route will only match POST requests to "/hello-world"
  */
@@ -146,7 +146,7 @@ Route parameters are segments of the url that can act as variables.  These segme
 in the route definition.  The captured values are made available to `req` via `req.params`, which is a plain javascript
 object whose keys are the names of the route parameters.
 
-```
+```js
 route.get('/hello/{name}', function(req, res) {
     
     res.end('Hello, '+ req.params.name);
@@ -157,7 +157,7 @@ route.get('/hello/{name}', function(req, res) {
 
 Regex constraints can be added by supplying a `where` in the route definition.
 
-```
+```js
 /*
  * This route will only match if the "name" parameter is composed of alpha characters only.
  */
@@ -172,7 +172,7 @@ route.get('/hello/{name}', {
 });
 ```
 One interesting effect of adding constraints is that you can have the same uri route to different actions using different constraints:
-```
+```js
 /*
  * Route alpha identifiers to this route.
  */
@@ -212,7 +212,7 @@ route.get('/user/{identifier}', {
 
 You may also specify "global" constraints, which will take effect every time that param is found.  
 This is accomplished with `ScenicRoute.pattern(param, pattern)`.
-```
+```js
 ScenicRoute.pattern('user_id', /^\d+$/);
 
 route.get('/user/{user_id}', function(req, res) {
@@ -227,7 +227,7 @@ Both of the above routes will have the constraint that "user_id" must be numeric
 
 #### Optional parameters
 Optional parameters can be specified by curly braces and a question mark (`{...?}`).  They must be the last segment in the uri, or an error will be thrown.
-```
+```js
 /*
  * This will match for "/hello/Shaun" and "/hello"
  */
@@ -243,7 +243,7 @@ route.get('/hello/{name?}', function(req, res) {
 
 Middleware can be added by supplying a `middleware` in the route definition, with an array of Connect-style middleware functions.
 They will run in sequence before the action.
-```
+```js
 route.get('/foo', {
     middleware: [
         function(req, res, next) {
@@ -279,7 +279,7 @@ If you call `next()` without an error, the rest of the error middleware stack wi
 and the default final handler will be called (which you probably won't want).
 
 All three of the following routes will result in errors that will be handled:
-```
+```js
 ScenicRoute.addErrorMiddleware(function(err, req, res, next) {
 
     console.log(err);
@@ -322,7 +322,7 @@ Also, notice that unlike Express, you can define error middleware at any point--
 ### Named Routes
 
 You can name routes to easily generate URLs to them, using `ScenicRoute.url(name, params)`, where `params` is optional.
-```
+```js
 route.get('/foo', {
     uses: function(req, res) {
     
@@ -333,7 +333,7 @@ route.get('/foo', {
 });
 ```
 Route parameters can be supplied as the second argument to `ScenicRoute.url`.
-```
+```js
 route.get('/foo/{bar}', {
     uses: function(req, res) {
     
@@ -347,7 +347,7 @@ route.get('/foo/{bar}', {
 });
 ```
 Additional parameters not a part of the uri will be appended as a query string.
-```
+```js
 route.get('/foo', {
     uses: function(req, res) {
     
@@ -375,7 +375,7 @@ The `options` argument is a plain javascript object, with the following paramete
 - `name`: prefixed to the names of any named routes in this group
 
 Grouping by prefix:
-```
+```js
 route.group({prefix: '/foo'}, function(route) {
 
     /*
@@ -394,7 +394,7 @@ route.group({prefix: '/foo'}, function(route) {
 });
 ```
 Grouping by middleware:
-```
+```js
 var m = function(req, res, next) {
     // will be applied to all routes in the group
     next();
@@ -417,7 +417,7 @@ route.group({middleware: m}, function(route) {
 });
 ```
 Supplying a name prefix:
-```
+```js
 route.group({name: 'foo-'}, function(route) {
 
     /*
@@ -441,7 +441,7 @@ route.group({name: 'foo-'}, function(route) {
 });
 ```
 Of course, none of these group options are mutually exclusive:
-```
+```js
 var m = function(req, res, next) {
     // will be applied to all routes in the group
     next();
@@ -470,7 +470,7 @@ route.group({prefix: '/foo', middleware: m, name: 'foo-'}, function(route) {
 });
 ```
 Groups can also be nested:
-```
+```js
 var m = function(req, res, next) {
     // will be applied to all routes in the group
     next();
@@ -514,7 +514,7 @@ route.group({prefix: '/foo', middleware: m, name: 'foo-'}, function(route) {
 
 Files out of a directory can be served using `route.serve(uri, public_dir, public_config)`, where `public_config` is optional.
 
-```
+```js
 var public_dir = path.join(__dirname,'/../public/uploads');
 
 /*
@@ -530,7 +530,7 @@ Additionally, scenic-route adds the following options:
 - `headers` - a function of signature `function(res, path, stat) {}` that can be used to set headers
 - `directoryHandler` - a function of signature `function(req, res, next) {}` that will be called whenever a directory is requested
     - the default currently defers to the `notFoundHandler`
-```
+```js
 var public_dir = path.join(__dirname,'/../public/uploads');
 
 var public_config = {
@@ -643,13 +643,13 @@ More details [here](#advanced-controller-support).
 ### The factory function
 
 The full factory function with all its (optional) arguments are as follows:
-```
+```js
 var ScenicRoute = require('scenic-route')(config);
 ```
 
 `config` is an object that can be used to override the defaults used. Any and all properties supplied are optional.
 Under the hood, [_.defaultsDeep](https://lodash.com/docs#defaultsDeep) is used. Here's the full possible structure:
-```
+```js
 {
     actionHandler: function(action, options, uri) {},
     middlewareHandler: function(middleware) {},
@@ -685,7 +685,7 @@ a `ScenicRoute` class, by supplying it to `ScenicRoute.actionHandler(closure)`.
 
 The default `actionHandler` simply checks if `action.uses` is a function.  If not, it throws an error.  To support controllers,
 you'll most likely want to change this behavior to allow `action.uses` to be a string, so that you can define routes like this:
-```
+```js
 /*
  * This will call the IndexController's "greeting" method.
  */
@@ -693,7 +693,7 @@ route.get('/hello', 'IndexController@greeting');
 ```
 
 As an example, let's assume your controllers are ES6 classes, where each method in the class is an action:
-```
+```js
 class IndexController {
 
     greeting(req, res) {
@@ -703,7 +703,7 @@ class IndexController {
 }
 ```
 To support this setup, you could change `actionHandler` like so:
-```
+```js
 function actionHandler(action, options, uri) {
 
     if (_.isString(action.uses)) {
@@ -757,7 +757,7 @@ There is a convenience method `route.controller(uri, controller_name, controller
 and makes routes for each of its methods, provided that its methods are named with the camel-case convention as {verb}{Action}.
 
 For example, assume this controller:
-```
+```js
 class GreetingController {
 
     getHi(req, res) {
@@ -778,34 +778,34 @@ class GreetingController {
 }
 ```
 Instead of creating these routes:
-```
+```js
 route.get('/greeting/hi', 'GreetingController@getHi');
 route.get('/greeting/hello', 'GreetingController@getHello');
 route.get('/greeting/hola', 'GreetingController@getHola');
 ```
 You can simply use `route.controller`:
-```
+```js
 route.controller('/greeting', 'GreetingController');
 ```
 
 The `route.controller` method takes the uri, then appends the ["kebab-case"](https://lodash.com/docs#kebabCase) version of each method
 found in that controller, using the appropriate verb.  If you don't want the method to be appended to the end of the uri, you can specify
 where you'd like it using an empty parameter placeholder: `{}`
-```
+```js
 route.controller('/greeting/{}/welcome', 'GreetingController');
 ```
 The above will create routes equivalent to:
-```
+```js
 route.get('/greeting/hi/welcome', 'GreetingController@getHi');
 route.get('/greeting/hello/welcome', 'GreetingController@getHello');
 route.get('/greeting/hola/welcome', 'GreetingController@getHola');
 ```
 You can of course also use regular route parameters as well:
-```
+```js
 route.controller('/greeting/{}/{name}', 'GreetingController');
 ```
 The above will create routes equivalent to:
-```
+```js
 route.get('/greeting/hi/{name}', 'GreetingController@getHi');
 route.get('/greeting/hello/{name}', 'GreetingController@getHello');
 route.get('/greeting/hola/{name}', 'GreetingController@getHola');
@@ -816,7 +816,7 @@ route.get('/greeting/hola/{name}', 'GreetingController@getHola');
 You may supply additional options for a controller method by providing it as the third argument to `route.controller`.
 The `controller_options` must be a plain javascript object whose keys are the method names, and the values are a plain
 javascript object with optional keys of `middleware` and `name`.
-```
+```js
 var controller_options = {
     getHi: {
         middleware: function(req, res, next) {
@@ -840,7 +840,7 @@ whose keys are the method names of the controller, and values are the action fun
 
 A `controllerHandler` can be supplied in the `config` argument in the scenic-route factory function, or if you already have
 a `ScenicRoute` class, by supplying it to `ScenicRoute.controllerHandler(closure)`.
-```
+```js
 function controllerHandler(controller_name, options, controller_options) {
 
     var controller_path = path.join(__dirname, 'controllers', options.namespace, controller_name);
