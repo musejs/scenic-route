@@ -1,18 +1,14 @@
 ## scenic-route
 
-This package is part of the [musejs](https://github.com/musejs) suite of components.
-
 This router was inspired heavily by Laravel's [router](http://laravel.com/docs/5.1/routing), in that it implements a very similar API.  
 
-As in other musejs components, this router employs the concept of "drivers" to promote flexibility.  In this case, drivers
+This router employs the concept of "drivers" to promote flexibility.  In this case, drivers
 control how actions are routed to, given a URL.  Scenic-route ships with two: HttpDriver and ExpressDriver.
 HttpDriver is the default, and its tree-based structure is slightly faster than Express.js.
 
 However, if you find yourself limited to using Express-only middleware, the provided ExpressDriver will use Express.js
 under the hood for routing instead.
 
-Pairing scenic-route with [encore-request](https://github.com/musejs/encore-request), [ovation-response](https://github.com/musejs/ovation-response) and 
-[jam-session](https://github.com/musejs/jam-session) produces a fully abstracted, modular request/response solution.
 
 ## Installation
 
